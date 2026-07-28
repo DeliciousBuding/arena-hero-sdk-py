@@ -14,12 +14,6 @@ Install the published release:
 python -m pip install arena-hero
 ```
 
-Install the latest `main` branch:
-
-```bash
-python -m pip install "arena-hero @ git+https://github.com/arena-hero/arena-hero-python.git"
-```
-
 The package name is `arena-hero`. The import name is `arena_hero`.
 
 ## Synchronous loop

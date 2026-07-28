@@ -27,12 +27,6 @@ Install the published release:
 pip install arena-hero
 ```
 
-Install the latest `main` branch:
-
-```bash
-pip install git+https://github.com/arena-hero/arena-hero-python.git
-```
-
 ## Synchronous game loop
 
 ```python
