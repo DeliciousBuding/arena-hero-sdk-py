@@ -6,20 +6,31 @@ You own the game loop. The SDK connects to the HTTP and WebSocket APIs, parses
 authoritative state, exposes control methods for every Unit type and Core, and
 submits one complete plan when you call `submit()`.
 
+## Documentation
+
+- [Quickstart](https://github.com/arena-hero/arena-hero-python/blob/main/docs/quickstart.md):
+  installation, synchronous and asynchronous loops, state access, Unit control,
+  and local development.
+- [API reference](https://github.com/arena-hero/arena-hero-python/blob/main/docs/api-reference.md):
+  every client option, Turn field, control method, model, event, enum, and
+  exception.
+- [Game rules and wire API](https://doc.arenahero.io/): authoritative gameplay,
+  HTTP, and WebSocket behavior.
+
 ## Install
 
 Python 3.11 or newer is required.
 
-Until the first PyPI release, install directly from GitHub:
-
-```bash
-pip install git+https://github.com/arena-hero/arena-hero-python.git
-```
-
-After a PyPI release:
+Install the published release:
 
 ```bash
 pip install arena-hero
+```
+
+Install the latest `main` branch:
+
+```bash
+pip install git+https://github.com/arena-hero/arena-hero-python.git
 ```
 
 ## Synchronous game loop
