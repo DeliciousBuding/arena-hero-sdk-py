@@ -1,0 +1,89 @@
+[project]
+name = "arena-hero"
+version = "0.1.0"
+description = "Official Python SDK for Arena Hero"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "Arena Hero" }]
+keywords = ["arena-hero", "game", "sdk", "websocket"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+dependencies = [
+    "httpx>=0.28.1,<1",
+    "pydantic>=2.13.4,<3",
+    "websockets>=16.1.1,<17",
+]
+
+[project.urls]
+Documentation = "https://doc.arenahero.io/"
+Repository = "https://github.com/arena-hero/arena-hero-python"
+Issues = "https://github.com/arena-hero/arena-hero-python/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "bandit[toml]>=1.9.4",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.0",
+    "ty>=0.0.64",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "A",
+    "ANN",
+    "ASYNC",
+    "B",
+    "C4",
+    "E",
+    "F",
+    "I",
+    "N",
+    "PERF",
+    "PIE",
+    "RUF",
+    "S",
+    "SIM",
+    "UP",
+    "W",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["ANN", "S101", "S105", "S106"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=arena_hero --cov-report=term-missing --cov-fail-under=90"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]
+
+[tool.bandit]
+exclude_dirs = [".venv", "tests"]
+skips = []
