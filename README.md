@@ -291,3 +291,7 @@ uv build
 
 The public game protocol is documented at
 [doc.arenahero.io](https://doc.arenahero.io/).
+
+## License
+
+[Apache License 2.0](LICENSE)
