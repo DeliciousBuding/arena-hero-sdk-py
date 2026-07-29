@@ -71,6 +71,7 @@ def test_state_models_enforce_conditional_fields() -> None:
             kind="CORE",
             id=UUID("00000000-0000-4000-8000-000000000001"),
             controlled=True,
+            owner_username="arena_hero",
             position=(0, 0),
             hp=5,
             shield=5,
@@ -90,11 +91,22 @@ def test_state_models_enforce_conditional_fields() -> None:
             kind="CORE",
             id=carrier_id,
             controlled=True,
+            owner_username="arena_hero",
             position=(0, 0),
             hp=5,
             shield=5,
             state=CoreState.MOVING,
         )
+
+    invalid_username = state_payload()
+    invalid_username["objects"][2]["owner_username"] = "@Arena Hero"
+    with pytest.raises(ValidationError, match="owner_username"):
+        PlayerState.model_validate(invalid_username)
+
+    missing_username = state_payload()
+    del missing_username["objects"][2]["owner_username"]
+    with pytest.raises(ValidationError, match="owner_username"):
+        PlayerState.model_validate(missing_username)
     with pytest.raises(ValidationError, match="cargo"):
         UnitView(
             kind="UNIT",

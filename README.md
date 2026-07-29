@@ -79,6 +79,9 @@ methods:
 - `ArenaHeroClient` with `for` and `turn.submit()`
 - `AsyncArenaHeroClient` with `async for` and `await turn.submit()`
 
+Every Core state includes its owner's public `owner_username` without a leading
+`@`. Display it as `f"@{core.owner_username}"`; Unit owners remain private.
+
 ## Control interfaces
 
 Every controlled object exposes its authoritative state through `.view`.

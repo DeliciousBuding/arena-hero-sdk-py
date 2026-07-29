@@ -239,6 +239,12 @@ class Core:
 
         return self._view.shield
 
+    @property
+    def owner_username(self) -> str:
+        """Return the username of the player who owns this Core."""
+
+        return self._view.owner_username
+
     def spawn(self, unit_type: UnitType) -> None:
         """Queue one Unit spawn."""
 

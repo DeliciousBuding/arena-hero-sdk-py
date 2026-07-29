@@ -125,6 +125,8 @@ Use the filtered collections when possible:
 
 - `turn.workers`, `turn.vanguards`, and `turn.rangers` contain controlled Units.
 - `turn.visible_enemies` contains visible enemy Units and Cores.
+- Every `CoreView` includes `owner_username`; display it as
+  `f"@{core.owner_username}"`. Unit owners remain private.
 - `turn.resource_cells` and `turn.obstacle_cells` are ready for membership
   checks.
 - `turn.events` contains private resolution results from the previous Tick.

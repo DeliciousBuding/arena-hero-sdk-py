@@ -293,6 +293,7 @@ The `Core` controller exposes:
 | `position` | `Position` |
 | `hp` | `int` |
 | `shield` | `int` |
+| `owner_username` | `str` |
 | `spawn(unit_type)` | Spawn `WORKER`, `VANGUARD`, or `RANGER`. |
 | `repair_shield()` | Spend one resource to repair one shield. |
 | `start_move(direction)` | Start moving the Core. |
@@ -342,6 +343,7 @@ For field semantics and visibility rules, see the
 | `kind` | `Literal["CORE"]` | Object discriminator. |
 | `id` | `UUID` | Stable Core identifier. |
 | `controlled` | `bool` | Whether this player controls the Core. |
+| `owner_username` | `str` | Public username of the Core owner, without the leading `@`. |
 | `position` | `Position` | Current visible cell. |
 | `hp` | `int` | Current hit points. |
 | `shield` | `int` | Current shield. |

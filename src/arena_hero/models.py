@@ -54,6 +54,7 @@ class CoreView(_StateModel):
     kind: Literal["CORE"]
     id: UUID
     controlled: bool
+    owner_username: str = Field(min_length=3, max_length=24, pattern=r"^[a-z0-9_]+$")
     position: Position
     hp: int = Field(ge=0)
     shield: int = Field(ge=0)

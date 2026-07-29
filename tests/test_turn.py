@@ -47,6 +47,7 @@ def test_exposes_every_control_type_and_state_query() -> None:
     assert turn.core.position == (0, 0)
     assert turn.core.hp == 5
     assert turn.core.shield == 5
+    assert turn.core.owner_username == "arena_hero"
     assert turn.workers[0].cargo == 0
     assert turn.workers[0].position == (1, 0)
     assert turn.workers[0].hp == 2
