@@ -168,6 +168,11 @@ difference is that `AsyncTurn.submit()` must be awaited.
 
 `Position` is `tuple[int, int]` in `(x, y)` order.
 
+`resource_cells` contains only currently visible, currently available points.
+One successful harvest consumes a point, and every fourth resolved Tick
+replenishes missing chunk slots. Same-point losers receive `HARVEST_FAILED` with
+`RESOURCE_DEPLETED`.
+
 ### Methods
 
 #### `unit(unit_id)`
@@ -221,6 +226,7 @@ All controlled Unit objects expose:
 | `move(direction)` | Queue a one-cell move. |
 | `pickup_beacon()` | Pick up the Beacon on the current cell. |
 | `drop_beacon()` | Drop a carried Beacon. |
+| `self_destruct()` | Remove this Unit before upkeep. Cargo is lost and there is no refund or area damage. |
 | `wait()` | Queue an explicit `WAIT`. |
 | `clear_action()` | Remove this Unit from the queued plan. |
 
@@ -446,6 +452,7 @@ does not merge it with an earlier plan.
 | `ShootAction` | `target_id`, `expected_cell` |
 | `PickupBeaconAction` | none |
 | `DropBeaconAction` | none |
+| `SelfDestructAction` | none |
 
 ### Core actions
 

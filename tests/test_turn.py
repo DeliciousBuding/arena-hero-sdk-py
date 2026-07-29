@@ -102,15 +102,18 @@ def test_all_unit_and_core_actions_can_be_queued_or_cleared() -> None:
     worker.deposit()
     worker.pickup_beacon()
     worker.drop_beacon()
+    worker.self_destruct()
     worker.wait()
     worker.clear_action()
     vanguard.move(Direction.UP)
     vanguard.pickup_beacon()
     vanguard.drop_beacon()
+    vanguard.self_destruct()
     vanguard.wait()
     ranger.move(Direction.DOWN)
     ranger.pickup_beacon()
     ranger.drop_beacon()
+    ranger.self_destruct()
     ranger.wait()
     ranger.shoot(
         UUID("00000000-0000-4000-8000-000000000005"),

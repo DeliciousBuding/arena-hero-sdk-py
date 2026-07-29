@@ -129,6 +129,12 @@ Use the filtered collections when possible:
   checks.
 - `turn.events` contains private resolution results from the previous Tick.
 
+Treat `turn.resource_cells` as current visible availability, not permanent map
+data. A successful harvest consumes the point; every fourth resolved Tick fills
+only missing slots back to each chunk's quota. When multiple eligible Workers
+contest one point, only the lowest UUID succeeds and the others receive
+`HARVEST_FAILED` with `RESOURCE_DEPLETED`.
+
 `turn.core` is `None` while your player is respawning.
 
 ## Control every object

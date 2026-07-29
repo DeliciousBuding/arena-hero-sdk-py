@@ -18,6 +18,7 @@ from .actions import (
     MoveAction,
     PickupBeaconAction,
     RepairShieldAction,
+    SelfDestructAction,
     ShootAction,
     SpawnAction,
     StartMoveAction,
@@ -117,6 +118,11 @@ class Unit:
         """Queue a Champion Beacon drop."""
 
         self._set(DropBeaconAction())
+
+    def self_destruct(self) -> None:
+        """Remove this Unit before upkeep without refund or damage."""
+
+        self._set(SelfDestructAction())
 
     def wait(self) -> None:
         """Queue an explicit WAIT."""

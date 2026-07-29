@@ -87,9 +87,9 @@ on that Turn.
 
 | Object | Available methods |
 | --- | --- |
-| `Worker` | `move`, `harvest`, `deposit`, `pickup_beacon`, `drop_beacon`, `wait`, `clear_action` |
-| `Vanguard` | `move`, `sweep`, `pickup_beacon`, `drop_beacon`, `wait`, `clear_action` |
-| `Ranger` | `move`, `shoot`, `pickup_beacon`, `drop_beacon`, `wait`, `clear_action` |
+| `Worker` | `move`, `harvest`, `deposit`, `pickup_beacon`, `drop_beacon`, `self_destruct`, `wait`, `clear_action` |
+| `Vanguard` | `move`, `sweep`, `pickup_beacon`, `drop_beacon`, `self_destruct`, `wait`, `clear_action` |
+| `Ranger` | `move`, `shoot`, `pickup_beacon`, `drop_beacon`, `self_destruct`, `wait`, `clear_action` |
 | `Core` | `spawn`, `repair_shield`, `start_move`, `cancel_move`, `pickup_beacon`, `drop_beacon`, `wait`, `clear_action` |
 
 Useful Turn data:
@@ -121,6 +121,7 @@ worker.harvest()
 worker.deposit()
 worker.pickup_beacon()
 worker.drop_beacon()
+worker.self_destruct()
 worker.wait()
 worker.clear_action()
 ```
@@ -134,6 +135,7 @@ vanguard.move(Direction.DOWN)
 vanguard.sweep(Direction.RIGHT)
 vanguard.pickup_beacon()
 vanguard.drop_beacon()
+vanguard.self_destruct()
 vanguard.wait()
 ```
 

@@ -65,6 +65,12 @@ class DropBeaconAction(_StrictModel):
     type: Literal["DROP_BEACON"] = "DROP_BEACON"
 
 
+class SelfDestructAction(_StrictModel):
+    """Remove a Unit before upkeep without refund or damage."""
+
+    type: Literal["SELF_DESTRUCT"] = "SELF_DESTRUCT"
+
+
 class SpawnAction(_StrictModel):
     """Spawn one Unit from the Core."""
 
@@ -99,7 +105,8 @@ UnitAction = Annotated[
     | SweepAction
     | ShootAction
     | PickupBeaconAction
-    | DropBeaconAction,
+    | DropBeaconAction
+    | SelfDestructAction,
     Field(discriminator="type"),
 ]
 
