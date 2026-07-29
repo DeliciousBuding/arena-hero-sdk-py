@@ -14,9 +14,11 @@ from arena_hero import (
     CoreView,
     Direction,
     HarvestAction,
+    HarvestSource,
     PlayerState,
     ProtocolError,
     Received,
+    ResolutionEvent,
     Tick,
     UnitView,
 )
@@ -134,6 +136,52 @@ def test_direction_deltas(
     delta: tuple[int, int],
 ) -> None:
     assert direction.delta == delta
+
+
+def test_resource_event_helpers() -> None:
+    dropped = ResolutionEvent(
+        event_id=UUID("00000000-0000-4000-8000-000000000010"),
+        tick=9,
+        event_type="WORKER_CARGO_DROPPED",
+        position=(4, 5),
+        values={"amount": 2},
+    )
+    recovered = ResolutionEvent(
+        event_id=UUID("00000000-0000-4000-8000-000000000011"),
+        tick=9,
+        event_type="HARVEST_SUCCEEDED",
+        position=(4, 5),
+        values={"amount": 1, "source": "DROPPED_CARGO"},
+    )
+
+    assert dropped.resource_amount == 2
+    assert dropped.harvest_source is None
+    assert recovered.resource_amount == 1
+    assert recovered.harvest_source is HarvestSource.DROPPED_CARGO
+
+
+@pytest.mark.parametrize(
+    ("values", "amount", "source"),
+    [
+        (None, None, None),
+        ({"amount": True, "source": 1}, None, None),
+        ({"amount": 0, "source": "A_FUTURE_SOURCE"}, None, None),
+    ],
+)
+def test_resource_event_helpers_ignore_missing_or_future_values(
+    values: dict[str, object] | None,
+    amount: int | None,
+    source: HarvestSource | None,
+) -> None:
+    event = ResolutionEvent(
+        event_id=UUID("00000000-0000-4000-8000-000000000012"),
+        tick=9,
+        event_type="HARVEST_SUCCEEDED",
+        values=values,
+    )
+
+    assert event.resource_amount == amount
+    assert event.harvest_source is source
 
 
 def test_plan_encoding_is_stable_compact_and_sorted() -> None:

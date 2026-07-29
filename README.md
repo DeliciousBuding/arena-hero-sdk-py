@@ -111,6 +111,11 @@ turn.events
 turn.plan
 ```
 
+`turn.resource_cells` includes visible natural points and Worker cargo piles.
+Pile amounts are not exposed; a partially recovered pile remains in the set.
+Use `event.resource_amount` and `event.harvest_source` on `turn.events` to read
+private cargo-drop and recovery results without unpacking `values` yourself.
+
 ### Worker
 
 ```python
@@ -125,6 +130,9 @@ worker.self_destruct()
 worker.wait()
 worker.clear_action()
 ```
+
+If a Worker dies, including through `self_destruct()`, its complete cargo amount
+becomes a recoverable resource pile on its final cell.
 
 ### Vanguard
 

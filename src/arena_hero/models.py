@@ -12,6 +12,7 @@ from .enums import (
     CommandSource,
     CoreState,
     Direction,
+    HarvestSource,
     PlayerStatus,
     UnitType,
 )
@@ -120,6 +121,29 @@ class ResolutionEvent(_StateModel):
     target_id: UUID | None = None
     position: Position | None = None
     values: dict[str, Any] | None = None
+
+    @property
+    def resource_amount(self) -> int | None:
+        """Return the amount carried by a resource event, when available."""
+
+        if self.event_type not in {"HARVEST_SUCCEEDED", "WORKER_CARGO_DROPPED"}:
+            return None
+        amount = self.values.get("amount") if self.values is not None else None
+        return amount if type(amount) is int and amount > 0 else None
+
+    @property
+    def harvest_source(self) -> HarvestSource | None:
+        """Return the natural-node or dropped-cargo source for a harvest."""
+
+        if self.event_type != "HARVEST_SUCCEEDED" or self.values is None:
+            return None
+        source = self.values.get("source")
+        if not isinstance(source, str):
+            return None
+        try:
+            return HarvestSource(source)
+        except ValueError:
+            return None
 
 
 class PlayerState(_StateModel):

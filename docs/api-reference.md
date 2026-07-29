@@ -160,7 +160,7 @@ difference is that `AsyncTurn.submit()` must be awaited.
 | `rangers` | `tuple[Ranger, ...]` | Controlled Rangers. |
 | `visible_enemies` | `tuple[UnitView | CoreView, ...]` | Visible enemy objects. |
 | `terrain` | `tuple[TerrainView, ...]` | Visible resource and obstacle batches. |
-| `resource_cells` | `frozenset[Position]` | Visible resource cells. |
+| `resource_cells` | `frozenset[Position]` | Visible natural-resource and dropped-cargo cells. |
 | `obstacle_cells` | `frozenset[Position]` | Visible obstacle cells. |
 | `beacon` | `ChampionBeacon` | Visibility-limited Beacon view. |
 | `events` | `tuple[ResolutionEvent, ...]` | Private results from the previous Tick. |
@@ -168,9 +168,10 @@ difference is that `AsyncTurn.submit()` must be awaited.
 
 `Position` is `tuple[int, int]` in `(x, y)` order.
 
-`resource_cells` contains only currently visible, currently available points.
-One successful harvest consumes a point, and every fourth resolved Tick
-replenishes missing chunk slots. Same-point losers receive `HARVEST_FAILED` with
+`resource_cells` contains visible natural points and Worker cargo piles, but not
+pile amounts. One successful harvest consumes a natural point; a partially
+recovered pile remains. Every fourth resolved Tick replenishes only missing
+natural chunk slots. Same-cell losers receive `HARVEST_FAILED` with
 `RESOURCE_DEPLETED`.
 
 ### Methods
@@ -226,7 +227,7 @@ All controlled Unit objects expose:
 | `move(direction)` | Queue a one-cell move. |
 | `pickup_beacon()` | Pick up the Beacon on the current cell. |
 | `drop_beacon()` | Drop a carried Beacon. |
-| `self_destruct()` | Remove this Unit before upkeep. Cargo is lost and there is no refund or area damage. |
+| `self_destruct()` | Remove this Unit before upkeep. Worker cargo drops on the final cell; there is no refund or area damage. |
 | `wait()` | Queue an explicit `WAIT`. |
 | `clear_action()` | Remove this Unit from the queued plan. |
 
@@ -247,6 +248,10 @@ Extra controls:
 |---|---|
 | `harvest()` | Harvest the resource on the current cell. |
 | `deposit()` | Deposit cargo while sharing a cell with the Core. |
+
+Any Worker death leaves its complete cargo amount as a recoverable resource pile
+on the final cell. For those events, use `event.resource_amount`; a successful
+recovery has `event.harvest_source is HarvestSource.DROPPED_CARGO`.
 
 ### Vanguard
 
@@ -375,11 +380,19 @@ Movement fields are either all present for `MOVING` or all absent for `NORMAL`.
 | `target_id` | `UUID | None` |
 | `position` | `Position | None` |
 | `values` | `dict[str, Any] | None` |
+| `resource_amount` | `int | None` |
+| `harvest_source` | `HarvestSource | None` |
 
 Event names and reason codes remain strings so newer server values do not break
 an older SDK. See
 [resolution results](https://doc.arenahero.io/api/resolution-results) for their
 meanings.
+
+`resource_amount` safely reads the positive `amount` from
+`WORKER_CARGO_DROPPED` and `HARVEST_SUCCEEDED`. `harvest_source` returns
+`HarvestSource.RESOURCE_NODE` or `HarvestSource.DROPPED_CARGO` for a successful
+harvest. Both properties return `None` when the event or a future value does not
+match.
 
 ### `Tick`
 
@@ -476,6 +489,7 @@ does not merge it with an earlier plan.
 | `CoreState` | `NORMAL`, `MOVING` |
 | `CommandSource` | `AGENT`, `MANUAL` |
 | `BeaconStatus` | `GROUND`, `CARRIED` |
+| `HarvestSource` | `RESOURCE_NODE`, `DROPPED_CARGO` |
 
 `Direction.delta` returns the corresponding `(dx, dy)` tuple.
 

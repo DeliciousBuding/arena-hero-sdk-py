@@ -26,6 +26,7 @@ from .enums import (
     CommandSource,
     CoreState,
     Direction,
+    HarvestSource,
     PlayerStatus,
     UnitType,
 )
@@ -78,6 +79,7 @@ __all__ = [
     "Direction",
     "DropBeaconAction",
     "HarvestAction",
+    "HarvestSource",
     "InvalidActionError",
     "MoveAction",
     "PickupBeaconAction",

@@ -57,3 +57,10 @@ class BeaconStatus(StrEnum):
 
     GROUND = "GROUND"
     CARRIED = "CARRIED"
+
+
+class HarvestSource(StrEnum):
+    """The resource source reported by a successful Worker harvest."""
+
+    RESOURCE_NODE = "RESOURCE_NODE"
+    DROPPED_CARGO = "DROPPED_CARGO"

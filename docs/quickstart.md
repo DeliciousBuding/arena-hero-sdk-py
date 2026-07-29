@@ -130,10 +130,24 @@ Use the filtered collections when possible:
 - `turn.events` contains private resolution results from the previous Tick.
 
 Treat `turn.resource_cells` as current visible availability, not permanent map
-data. A successful harvest consumes the point; every fourth resolved Tick fills
-only missing slots back to each chunk's quota. When multiple eligible Workers
-contest one point, only the lowest UUID succeeds and the others receive
-`HARVEST_FAILED` with `RESOURCE_DEPLETED`.
+data. It includes natural points and cargo piles left by dead Workers, but not
+pile amounts. A successful harvest consumes a natural point; a partially
+recovered pile remains. Every fourth resolved Tick fills only missing natural
+slots back to each chunk's quota. When multiple eligible Workers contest one
+cell, only the lowest UUID succeeds and the others receive `HARVEST_FAILED` with
+`RESOURCE_DEPLETED`.
+
+Cargo-drop events have typed helpers:
+
+```python
+from arena_hero import HarvestSource
+
+for event in turn.events:
+    if event.event_type == "WORKER_CARGO_DROPPED":
+        print("dropped", event.resource_amount, "at", event.position)
+    elif event.harvest_source is HarvestSource.DROPPED_CARGO:
+        print("recovered", event.resource_amount, "at", event.position)
+```
 
 `turn.core` is `None` while your player is respawning.
 
