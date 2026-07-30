@@ -8,7 +8,7 @@ def state_payload() -> dict[str, Any]:
 
     return {
         "status": "ACTIVE",
-        "resources": 42,
+        "resources": 15,
         "population": 3,
         "population_tier": 0,
         "upkeep_next_tick": 0,

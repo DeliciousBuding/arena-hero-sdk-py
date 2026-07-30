@@ -107,6 +107,8 @@ Each `Turn` is a complete authoritative state snapshot for one Tick:
 turn.tick
 turn.state
 turn.resources
+turn.resource_capacity
+turn.resource_space
 turn.core
 turn.units
 turn.workers
@@ -120,6 +122,12 @@ turn.beacon
 turn.events
 turn.plan
 ```
+
+Core storage accepts 5 resources per living Unit. A partial deposit leaves its
+remainder on the Worker; a full Core rejects the deposit
+without deleting cargo. If population falls, stored resources above the new
+capacity are destroyed immediately. Use `turn.resource_space` before choosing
+`deposit()`.
 
 Use the filtered collections when possible:
 

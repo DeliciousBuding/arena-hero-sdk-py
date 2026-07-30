@@ -127,7 +127,12 @@ class ResolutionEvent(_StateModel):
     def resource_amount(self) -> int | None:
         """Return the amount carried by a resource event, when available."""
 
-        if self.event_type not in {"HARVEST_SUCCEEDED", "WORKER_CARGO_DROPPED"}:
+        if self.event_type not in {
+            "CORE_RESOURCE_OVERFLOW_DESTROYED",
+            "DEPOSIT_SUCCEEDED",
+            "HARVEST_SUCCEEDED",
+            "WORKER_CARGO_DROPPED",
+        }:
             return None
         amount = self.values.get("amount") if self.values is not None else None
         return amount if type(amount) is int and amount > 0 else None

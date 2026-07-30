@@ -37,6 +37,7 @@ from .models import (
     TerrainView,
     UnitView,
 )
+from .rules import core_resource_capacity
 
 ObservedEntity: TypeAlias = CoreView | UnitView
 _SyncSubmitter = Callable[[CommandPlan, str | None], Accepted]
@@ -155,7 +156,7 @@ class Worker(Unit):
         self._set(HarvestAction())
 
     def deposit(self) -> None:
-        """Queue a cargo deposit."""
+        """Queue a deposit up to the Core's remaining storage capacity."""
 
         self._set(DepositAction())
 
@@ -357,6 +358,18 @@ class _TurnBase:
         """Return resources currently stored in the Core."""
 
         return self.state.resources
+
+    @property
+    def resource_capacity(self) -> int:
+        """Return the current Core capacity at five resources per Unit."""
+
+        return core_resource_capacity(self.state.population)
+
+    @property
+    def resource_space(self) -> int:
+        """Return how many more resources the Core can currently accept."""
+
+        return max(0, self.resource_capacity - self.resources)
 
     @property
     def beacon(self) -> ChampionBeacon:

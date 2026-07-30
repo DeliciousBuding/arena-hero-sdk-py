@@ -165,11 +165,29 @@ def test_resource_event_helpers() -> None:
         position=(4, 5),
         values={"amount": 1, "source": "DROPPED_CARGO"},
     )
+    deposited = ResolutionEvent(
+        event_id=UUID("00000000-0000-4000-8000-000000000013"),
+        tick=9,
+        event_type="DEPOSIT_SUCCEEDED",
+        position=(4, 5),
+        values={"amount": 1, "capacity": 15, "remaining": 1},
+    )
+    destroyed = ResolutionEvent(
+        event_id=UUID("00000000-0000-4000-8000-000000000014"),
+        tick=9,
+        event_type="CORE_RESOURCE_OVERFLOW_DESTROYED",
+        position=(0, 0),
+        values={"amount": 5, "capacity": 10},
+    )
 
     assert dropped.resource_amount == 2
     assert dropped.harvest_source is None
     assert recovered.resource_amount == 1
     assert recovered.harvest_source is HarvestSource.DROPPED_CARGO
+    assert deposited.resource_amount == 1
+    assert deposited.harvest_source is None
+    assert destroyed.resource_amount == 5
+    assert destroyed.harvest_source is None
 
 
 @pytest.mark.parametrize(

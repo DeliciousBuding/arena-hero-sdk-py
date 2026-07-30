@@ -101,6 +101,8 @@ Useful Turn data:
 turn.tick
 turn.state
 turn.resources
+turn.resource_capacity
+turn.resource_space
 turn.core
 turn.units
 turn.workers
@@ -114,10 +116,16 @@ turn.events
 turn.plan
 ```
 
+Core storage accepts 5 resources per living Unit. `resource_capacity` is
+`state.population * 5`; `resource_space` is the non-negative amount a Worker
+can still deposit. If population falls, Core resources above the new capacity
+are destroyed immediately.
+
 `turn.resource_cells` includes visible natural points and Worker cargo piles.
 Pile amounts are not exposed; a partially recovered pile remains in the set.
 Use `event.resource_amount` and `event.harvest_source` on `turn.events` to read
-private cargo-drop and recovery results without unpacking `values` yourself.
+private cargo-drop, recovery, deposit, and overflow-destruction amounts without
+unpacking `values` yourself.
 
 ### Worker
 
@@ -126,7 +134,7 @@ worker = turn.workers[0]
 
 worker.move(Direction.UP)
 worker.harvest()
-worker.deposit()
+worker.deposit()  # stores what fits; any remainder stays on the Worker
 worker.pickup_beacon()
 worker.drop_beacon()
 worker.self_destruct()

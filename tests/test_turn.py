@@ -37,7 +37,9 @@ def accepted() -> Accepted:
 def test_exposes_every_control_type_and_state_query() -> None:
     turn = Turn(tick=9, state=make_state(), submitter=lambda _plan, _key: accepted())
 
-    assert turn.resources == 42
+    assert turn.resources == 15
+    assert turn.resource_capacity == 15
+    assert turn.resource_space == 0
     assert len(turn.units) == 3
     assert len(turn.workers) == 1
     assert len(turn.vanguards) == 1
