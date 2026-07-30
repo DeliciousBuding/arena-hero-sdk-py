@@ -116,10 +116,11 @@ turn.events
 turn.plan
 ```
 
-Core storage accepts 5 resources per living Unit. `resource_capacity` is
-`state.population * 5`; `resource_space` is the non-negative amount a Worker
-can still deposit. If population falls, Core resources above the new capacity
-are destroyed immediately.
+Core storage has a minimum capacity of 10, then accepts 5 resources per living
+Unit: `resource_capacity` is `max(10, state.population * 5)`.
+`resource_space` is the non-negative amount a Worker can still deposit. If
+population falls, Core resources above the new capacity are destroyed
+immediately.
 
 `turn.resource_cells` includes visible natural points and Worker cargo piles.
 Pile amounts are not exposed; a partially recovered pile remains in the set.

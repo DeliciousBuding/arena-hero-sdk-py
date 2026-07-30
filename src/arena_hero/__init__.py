@@ -52,13 +52,18 @@ from .models import (
     Tick,
     UnitView,
 )
-from .rules import CORE_RESOURCE_CAPACITY_PER_UNIT, core_resource_capacity
+from .rules import (
+    CORE_RESOURCE_CAPACITY_PER_UNIT,
+    CORE_RESOURCE_MINIMUM_CAPACITY,
+    core_resource_capacity,
+)
 from .turn import AsyncTurn, Core, Ranger, Turn, Unit, Vanguard, Worker
 
 __version__ = version("arena-hero")
 
 __all__ = [
     "CORE_RESOURCE_CAPACITY_PER_UNIT",
+    "CORE_RESOURCE_MINIMUM_CAPACITY",
     "APIError",
     "Accepted",
     "ArenaHeroClient",

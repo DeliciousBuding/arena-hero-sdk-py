@@ -3,6 +3,7 @@
 from typing import Final
 
 CORE_RESOURCE_CAPACITY_PER_UNIT: Final = 5
+CORE_RESOURCE_MINIMUM_CAPACITY: Final = 10
 
 
 def core_resource_capacity(population: int) -> int:
@@ -10,4 +11,7 @@ def core_resource_capacity(population: int) -> int:
 
     if population < 0:
         raise ValueError("population must not be negative")
-    return population * CORE_RESOURCE_CAPACITY_PER_UNIT
+    return max(
+        CORE_RESOURCE_MINIMUM_CAPACITY,
+        population * CORE_RESOURCE_CAPACITY_PER_UNIT,
+    )

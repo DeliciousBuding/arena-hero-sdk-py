@@ -361,7 +361,7 @@ class _TurnBase:
 
     @property
     def resource_capacity(self) -> int:
-        """Return the current Core capacity at five resources per Unit."""
+        """Return the current Core capacity with its ten-resource minimum."""
 
         return core_resource_capacity(self.state.population)
 
