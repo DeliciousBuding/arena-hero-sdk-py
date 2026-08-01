@@ -44,6 +44,7 @@ from .errors import (
 from .geometry import Coordinate, Position
 from .models import (
     ChampionBeacon,
+    CoreResourceCapture,
     CoreView,
     PlayerState,
     Received,
@@ -80,6 +81,7 @@ __all__ = [
     "ConfigurationError",
     "Coordinate",
     "Core",
+    "CoreResourceCapture",
     "CoreState",
     "CoreView",
     "DepositAction",

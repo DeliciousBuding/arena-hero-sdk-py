@@ -179,6 +179,13 @@ def test_resource_event_helpers() -> None:
         position=(0, 0),
         values={"amount": 5, "capacity": 10},
     )
+    captured = ResolutionEvent(
+        event_id=UUID("00000000-0000-4000-8000-000000000015"),
+        tick=9,
+        event_type="CORE_RESOURCES_CAPTURED",
+        position=(0, 0),
+        values={"amount": 1, "available": 6, "destroyed": 5, "capacity": 10},
+    )
 
     assert dropped.resource_amount == 2
     assert dropped.harvest_source is None
@@ -188,6 +195,32 @@ def test_resource_event_helpers() -> None:
     assert deposited.harvest_source is None
     assert destroyed.resource_amount == 5
     assert destroyed.harvest_source is None
+    assert captured.resource_amount == 1
+    assert captured.core_resource_capture is not None
+    assert captured.core_resource_capture.amount == 1
+    assert captured.core_resource_capture.available == 6
+    assert captured.core_resource_capture.destroyed == 5
+    assert captured.core_resource_capture.capacity == 10
+
+
+def test_core_resource_capture_helper_accepts_zero_and_rejects_bad_accounting() -> None:
+    full = ResolutionEvent(
+        event_id=UUID("00000000-0000-4000-8000-000000000016"),
+        tick=9,
+        event_type="CORE_RESOURCES_CAPTURED",
+        values={"amount": 0, "available": 5, "destroyed": 5, "capacity": 10},
+    )
+    malformed = ResolutionEvent(
+        event_id=UUID("00000000-0000-4000-8000-000000000017"),
+        tick=9,
+        event_type="CORE_RESOURCES_CAPTURED",
+        values={"amount": 1, "available": 5, "destroyed": 5, "capacity": 10},
+    )
+
+    assert full.resource_amount is None
+    assert full.core_resource_capture is not None
+    assert full.core_resource_capture.amount == 0
+    assert malformed.core_resource_capture is None
 
 
 @pytest.mark.parametrize(

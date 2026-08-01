@@ -111,6 +111,23 @@ WorldObject = Annotated[
 ]
 
 
+class CoreResourceCapture(_StateModel):
+    """Typed values from a ``CORE_RESOURCES_CAPTURED`` result."""
+
+    amount: int = Field(ge=0)
+    available: int = Field(ge=1)
+    destroyed: int = Field(ge=0)
+    capacity: int = Field(ge=0)
+
+    @model_validator(mode="after")
+    def validate_distribution(self) -> "CoreResourceCapture":
+        """Account for every resource removed from the destroyed Core."""
+
+        if self.amount + self.destroyed != self.available:
+            raise ValueError("amount and destroyed must equal available")
+        return self
+
+
 class ResolutionEvent(_StateModel):
     """A private result produced while resolving the previous Tick."""
 
@@ -128,6 +145,7 @@ class ResolutionEvent(_StateModel):
         """Return the amount carried by a resource event, when available."""
 
         if self.event_type not in {
+            "CORE_RESOURCES_CAPTURED",
             "CORE_RESOURCE_OVERFLOW_DESTROYED",
             "DEPOSIT_SUCCEEDED",
             "HARVEST_SUCCEEDED",
@@ -136,6 +154,17 @@ class ResolutionEvent(_StateModel):
             return None
         amount = self.values.get("amount") if self.values is not None else None
         return amount if type(amount) is int and amount > 0 else None
+
+    @property
+    def core_resource_capture(self) -> CoreResourceCapture | None:
+        """Return typed Core loot values when the event is well formed."""
+
+        if self.event_type != "CORE_RESOURCES_CAPTURED" or self.values is None:
+            return None
+        try:
+            return CoreResourceCapture.model_validate(self.values)
+        except ValueError:
+            return None
 
     @property
     def harvest_source(self) -> HarvestSource | None:
