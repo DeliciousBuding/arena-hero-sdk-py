@@ -159,7 +159,9 @@ for event in turn.events:
         print("recovered", event.resource_amount, "at", event.position)
 ```
 
-`turn.core` is `None` while your player is respawning.
+`turn.core` is `None` only during initial admission or a spawn retry after the
+server could not find a legal position. Core destruction has no cooldown and
+normally produces a replacement in the same Tick.
 
 ## Control every object
 

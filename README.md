@@ -181,7 +181,8 @@ ranger.shoot(target_id, expected_cell=(120, 85))
 
 ### Core
 
-The Core may be absent while the player is respawning.
+The Core is absent only during initial admission or a failed-spawn retry. Core
+destruction has no cooldown and normally creates a replacement in the same Tick.
 
 ```python
 if turn.core is not None:
