@@ -183,6 +183,8 @@ class Ranger(Unit):
 
         Passing a visible Unit, Core, or controller derives both required wire
         fields. Passing a UUID or UUID string requires ``expected_cell``.
+        The server resolves horizontal, vertical, or exact 45-degree diagonal
+        shots at range 1-3; this method does not prevalidate that geometry.
         """
 
         if isinstance(target, (Unit, Core, UnitView, CoreView)):

@@ -170,6 +170,11 @@ enemy = turn.visible_enemies[0]
 ranger.shoot(enemy)
 ```
 
+The server can hit a target 1-3 cells away on the same row, column, or exact
+45-degree diagonal. A relative offset such as `(3, 3)` is in range; `(2, 1)`
+is not. Only obstacles on the intermediate shot cells block fire. Units, Cores,
+and obstacles beside a diagonal do not block it.
+
 When you only have a UUID, provide the expected cell:
 
 ```python

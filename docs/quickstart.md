@@ -188,6 +188,10 @@ if turn.core is not None:
 turn.submit()
 ```
 
+A Ranger hits only when the target resolves 1-3 cells away on the same row,
+column, or exact 45-degree diagonal. The SDK queues the shot but leaves this
+dynamic rule to the server, so choose targets from the current Turn carefully.
+
 Every controlled Unit and the Core has one action slot. A later action call
 replaces the earlier action in that slot.
 

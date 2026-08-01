@@ -46,7 +46,7 @@ class SweepAction(_StrictModel):
 
 
 class ShootAction(_StrictModel):
-    """Shoot an expected target cell with a Ranger."""
+    """Shoot an expected target cell with a Ranger in an eight-direction line."""
 
     type: Literal["SHOOT"] = "SHOOT"
     target_id: UUID
