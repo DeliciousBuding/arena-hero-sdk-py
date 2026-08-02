@@ -71,6 +71,12 @@ class SelfDestructAction(_StrictModel):
     type: Literal["SELF_DESTRUCT"] = "SELF_DESTRUCT"
 
 
+class HealAction(_StrictModel):
+    """Recover HP after combat by spending Core resources."""
+
+    type: Literal["HEAL"] = "HEAL"
+
+
 class SpawnAction(_StrictModel):
     """Spawn one Unit from the Core."""
 
@@ -106,7 +112,8 @@ UnitAction = Annotated[
     | ShootAction
     | PickupBeaconAction
     | DropBeaconAction
-    | SelfDestructAction,
+    | SelfDestructAction
+    | HealAction,
     Field(discriminator="type"),
 ]
 
@@ -117,7 +124,8 @@ CoreAction = Annotated[
     | StartMoveAction
     | CancelMoveAction
     | PickupBeaconAction
-    | DropBeaconAction,
+    | DropBeaconAction
+    | HealAction,
     Field(discriminator="type"),
 ]
 

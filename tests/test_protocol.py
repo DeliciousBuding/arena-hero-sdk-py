@@ -223,6 +223,25 @@ def test_core_resource_capture_helper_accepts_zero_and_rejects_bad_accounting() 
     assert malformed.core_resource_capture is None
 
 
+def test_healing_result_helper_validates_cost() -> None:
+    healed = ResolutionEvent(
+        event_id=UUID("00000000-0000-4000-8000-000000000031"),
+        tick=9,
+        event_type="UNIT_HEAL_SUCCEEDED",
+        values={"amount": 2, "hp": 4, "cost": 2},
+    )
+    malformed = ResolutionEvent(
+        event_id=UUID("00000000-0000-4000-8000-000000000032"),
+        tick=9,
+        event_type="CORE_HEAL_SUCCEEDED",
+        values={"amount": 2, "hp": 5, "cost": 1},
+    )
+    assert healed.healing is not None
+    assert healed.healing.amount == 2
+    assert healed.healing.hp == 4
+    assert malformed.healing is None
+
+
 @pytest.mark.parametrize(
     ("values", "amount", "source"),
     [

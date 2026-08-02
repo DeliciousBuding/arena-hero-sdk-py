@@ -90,10 +90,10 @@ on that Turn.
 
 | Object | Available methods |
 | --- | --- |
-| `Worker` | `move`, `harvest`, `deposit`, `pickup_beacon`, `drop_beacon`, `self_destruct`, `wait`, `clear_action` |
-| `Vanguard` | `move`, `sweep`, `pickup_beacon`, `drop_beacon`, `self_destruct`, `wait`, `clear_action` |
-| `Ranger` | `move`, `shoot`, `pickup_beacon`, `drop_beacon`, `self_destruct`, `wait`, `clear_action` |
-| `Core` | `spawn`, `repair_shield`, `start_move`, `cancel_move`, `pickup_beacon`, `drop_beacon`, `wait`, `clear_action` |
+| `Worker` | `move`, `harvest`, `deposit`, `pickup_beacon`, `drop_beacon`, `heal`, `self_destruct`, `wait`, `clear_action` |
+| `Vanguard` | `move`, `sweep`, `pickup_beacon`, `drop_beacon`, `heal`, `self_destruct`, `wait`, `clear_action` |
+| `Ranger` | `move`, `shoot`, `pickup_beacon`, `drop_beacon`, `heal`, `self_destruct`, `wait`, `clear_action` |
+| `Core` | `spawn`, `heal`, `repair_shield`, `start_move`, `cancel_move`, `pickup_beacon`, `drop_beacon`, `wait`, `clear_action` |
 
 Useful Turn data:
 
@@ -138,6 +138,7 @@ worker.harvest()
 worker.deposit()  # stores what fits; any remainder stays on the Worker
 worker.pickup_beacon()
 worker.drop_beacon()
+worker.heal()
 worker.self_destruct()
 worker.wait()
 worker.clear_action()
@@ -155,6 +156,7 @@ vanguard.move(Direction.DOWN)
 vanguard.sweep(Direction.RIGHT)
 vanguard.pickup_beacon()
 vanguard.drop_beacon()
+vanguard.heal()
 vanguard.self_destruct()
 vanguard.wait()
 ```
@@ -192,6 +194,7 @@ destruction has no cooldown and normally creates a replacement in the same Tick.
 ```python
 if turn.core is not None:
     turn.core.spawn(UnitType.WORKER)
+    turn.core.heal()
     turn.core.repair_shield()
     turn.core.start_move(Direction.RIGHT)
     turn.core.cancel_move()
@@ -199,6 +202,13 @@ if turn.core is not None:
     turn.core.drop_beacon()
     turn.core.wait()
 ```
+
+`heal()` resolves after combat and spends one Core resource per HP actually
+recovered, up to full HP. A Unit must still be alive on the same cell as its
+own stationary Core. Unit heals spend resources before the Core action. It is
+valid to queue a heal while HP is full or resources are currently empty:
+damage and captured Core resources from that Tick are resolved first. A fatal
+hit cannot be healed.
 
 ## Complete event stream
 

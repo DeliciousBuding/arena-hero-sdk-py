@@ -51,6 +51,14 @@ worker.move(Direction.UP)
 worker.harvest()  # HARVEST replaces MOVE for this Worker.
 ```
 
+Queue HP recovery with `unit.heal()` or `turn.core.heal()`. Healing resolves
+after combat, costs one Core resource per HP actually recovered, and can spend
+multiple resources to reach full HP. A Unit must survive on the same cell as
+its own stationary Core. Unit heals use resources before the Core action, and
+fatal damage cannot be healed. You may queue healing while HP is full or the
+Core is currently empty because same-Tick damage and captured resources resolve
+first.
+
 The context manager closes the HTTP and WebSocket connections when the loop
 ends.
 

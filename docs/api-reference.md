@@ -229,6 +229,7 @@ All controlled Unit objects expose:
 | `move(direction)` | Queue a one-cell move. |
 | `pickup_beacon()` | Pick up the Beacon on the current cell. |
 | `drop_beacon()` | Drop a carried Beacon. |
+| `heal()` | Recover HP after combat while sharing a cell with the owned stationary Core. |
 | `self_destruct()` | Remove this Unit before upkeep. Worker cargo drops on the final cell; there is no refund or area damage. |
 | `wait()` | Queue an explicit `WAIT`. |
 | `clear_action()` | Remove this Unit from the queued plan. |
@@ -314,6 +315,7 @@ The `Core` controller exposes:
 | `shield` | `int` |
 | `owner_username` | `str` |
 | `spawn(unit_type)` | Spawn `WORKER`, `VANGUARD`, or `RANGER`. |
+| `heal()` | Recover Core HP after combat. |
 | `repair_shield()` | Spend one resource to repair one shield. |
 | `start_move(direction)` | Start moving the Core. |
 | `cancel_move()` | Cancel current Core movement. |
@@ -323,6 +325,14 @@ The `Core` controller exposes:
 | `clear_action()` | Remove the queued Core action. |
 
 The Core has one action slot. A later method call replaces the earlier action.
+
+Both Unit and Core healing cost one Core resource per HP actually recovered and
+automatically spend enough to reach full HP when possible. Unit healing
+requires the Unit to survive on the same cell as its own stationary Core. All
+healing resolves after combat; Unit heals run before the Core action. Queuing a
+heal while HP is full or resources are currently unavailable is valid because
+same-Tick damage and captured Core resources resolve first. Dynamic failure
+does not spend resources.
 
 ## State models
 
@@ -403,6 +413,7 @@ Movement fields are either all present for `MOVING` or all absent for `NORMAL`.
 | `values` | `dict[str, Any] | None` |
 | `resource_amount` | `int | None` |
 | `core_resource_capture` | `CoreResourceCapture | None` |
+| `healing` | `HealingResult | None` |
 | `harvest_source` | `HarvestSource | None` |
 
 Event names and reason codes remain strings so newer server values do not break
@@ -419,10 +430,22 @@ meanings.
 not fit), and `capacity` (the winner's post-combat capacity). `amount` can be
 zero when the winner's Core is full; `amount + destroyed` always equals
 `available`.
+`healing` parses `UNIT_HEAL_SUCCEEDED` and `CORE_HEAL_SUCCEEDED` values into a
+`HealingResult` with `amount`, post-heal `hp`, and `cost`. Failed healing events
+return `None`; inspect `reason_code` for `HP_FULL`, `INSUFFICIENT_RESOURCES`,
+`NOT_AT_OWN_CORE`, or `CORE_MOVING`.
 `harvest_source` returns
 `HarvestSource.RESOURCE_NODE` or `HarvestSource.DROPPED_CARGO` for a successful
-harvest. Both properties return `None` when the event or a future value does not
+harvest. These helpers return `None` when the event or a future value does not
 match.
+
+### `HealingResult`
+
+| Field | Type | Meaning |
+|---|---|---|
+| `amount` | positive `int` | HP actually recovered. |
+| `hp` | positive `int` | Object HP after recovery. |
+| `cost` | positive `int` | Resources spent; always equal to `amount`. |
 
 ## Rule helpers
 
@@ -511,6 +534,7 @@ does not merge it with an earlier plan.
 | `PickupBeaconAction` | none |
 | `DropBeaconAction` | none |
 | `SelfDestructAction` | none |
+| `HealAction` | none |
 
 ### Core actions
 
@@ -519,6 +543,7 @@ does not merge it with an earlier plan.
 | `WaitAction` | none |
 | `SpawnAction` | `unit_type` |
 | `RepairShieldAction` | none |
+| `HealAction` | none |
 | `StartMoveAction` | `direction` |
 | `CancelMoveAction` | none |
 | `PickupBeaconAction` | none |

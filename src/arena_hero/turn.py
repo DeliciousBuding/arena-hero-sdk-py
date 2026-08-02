@@ -15,6 +15,7 @@ from .actions import (
     DepositAction,
     DropBeaconAction,
     HarvestAction,
+    HealAction,
     MoveAction,
     PickupBeaconAction,
     RepairShieldAction,
@@ -124,6 +125,11 @@ class Unit:
         """Remove this Unit before upkeep; Worker cargo drops on its final cell."""
 
         self._set(SelfDestructAction())
+
+    def heal(self) -> None:
+        """Queue post-combat HP recovery at the Unit's stationary Core."""
+
+        self._set(HealAction())
 
     def wait(self) -> None:
         """Queue an explicit WAIT."""
@@ -257,6 +263,11 @@ class Core:
         """Queue one shield repair."""
 
         self._set(RepairShieldAction())
+
+    def heal(self) -> None:
+        """Queue post-combat Core HP recovery."""
+
+        self._set(HealAction())
 
     def start_move(self, direction: Direction) -> None:
         """Queue the start of Core movement."""

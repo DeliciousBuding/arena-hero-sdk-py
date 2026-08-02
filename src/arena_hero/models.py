@@ -128,6 +128,22 @@ class CoreResourceCapture(_StateModel):
         return self
 
 
+class HealingResult(_StateModel):
+    """Typed values from a successful Unit or Core heal result."""
+
+    amount: int = Field(ge=1)
+    hp: int = Field(ge=1)
+    cost: int = Field(ge=1)
+
+    @model_validator(mode="after")
+    def validate_cost(self) -> "HealingResult":
+        """Require one resource for every recovered HP."""
+
+        if self.cost != self.amount:
+            raise ValueError("healing cost must equal recovered HP")
+        return self
+
+
 class ResolutionEvent(_StateModel):
     """A private result produced while resolving the previous Tick."""
 
@@ -163,6 +179,24 @@ class ResolutionEvent(_StateModel):
             return None
         try:
             return CoreResourceCapture.model_validate(self.values)
+        except ValueError:
+            return None
+
+    @property
+    def healing(self) -> HealingResult | None:
+        """Return typed values from a successful Unit or Core heal."""
+
+        if (
+            self.event_type
+            not in {
+                "UNIT_HEAL_SUCCEEDED",
+                "CORE_HEAL_SUCCEEDED",
+            }
+            or self.values is None
+        ):
+            return None
+        try:
+            return HealingResult.model_validate(self.values)
         except ValueError:
             return None
 
