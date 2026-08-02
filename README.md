@@ -122,6 +122,12 @@ Unit: `resource_capacity` is `max(10, state.population * 5)`.
 population falls, Core resources above the new capacity are destroyed
 immediately.
 
+`turn.state.upkeep_next_tick` is charged before movement. If the Core cannot
+pay it all, each unpaid point deals one HP of damage to excess Units instead of
+the Core. The 19 Units nearest the Core are protected; farther Units take the
+damage first. Read `UNIT_DAMAGED` events whose `reason_code` is
+`"UPKEEP_DEFICIT"` to see the affected Unit, damage, and remaining HP.
+
 `turn.resource_cells` includes visible natural points and Worker cargo piles.
 Pile amounts are not exposed; a partially recovered pile remains in the set.
 Use `event.resource_amount` and `event.harvest_source` on `turn.events` to read
@@ -144,8 +150,8 @@ worker.wait()
 worker.clear_action()
 ```
 
-If a Worker dies, including through `self_destruct()`, its complete cargo amount
-becomes a recoverable resource pile on its final cell.
+If a Worker dies, including through unpaid upkeep or `self_destruct()`, its
+complete cargo amount becomes a recoverable resource pile on its final cell.
 
 ### Vanguard
 
