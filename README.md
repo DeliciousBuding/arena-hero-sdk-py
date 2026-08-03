@@ -93,7 +93,7 @@ on that Turn.
 | `Worker` | `move`, `harvest`, `deposit`, `pickup_beacon`, `drop_beacon`, `heal`, `self_destruct`, `wait`, `clear_action` |
 | `Vanguard` | `move`, `sweep`, `pickup_beacon`, `drop_beacon`, `heal`, `self_destruct`, `wait`, `clear_action` |
 | `Ranger` | `move`, `shoot`, `pickup_beacon`, `drop_beacon`, `heal`, `self_destruct`, `wait`, `clear_action` |
-| `Core` | `spawn`, `heal`, `repair_shield`, `start_move`, `cancel_move`, `pickup_beacon`, `drop_beacon`, `wait`, `clear_action` |
+| `Core` | `spawn`, `heal`, `repair_shield`, `start_move`, `cancel_move`, `pickup_beacon`, `drop_beacon`, `self_destruct`, `wait`, `clear_action` |
 
 Useful Turn data:
 
@@ -206,6 +206,7 @@ if turn.core is not None:
     turn.core.cancel_move()
     turn.core.pickup_beacon()
     turn.core.drop_beacon()
+    turn.core.self_destruct()
     turn.core.wait()
 ```
 
@@ -215,6 +216,13 @@ own stationary Core. Unit heals spend resources before the Core action. It is
 valid to queue a heal while HP is full or resources are currently empty:
 damage and captured Core resources from that Tick are resolved first. A fatal
 hit cannot be healed.
+
+`self_destruct()` is always valid, including while the Core is moving, and has
+no resource, Unit, or cooldown requirement. Movement and combat resolve first.
+If an enemy attack destroys the Core, normal attack credit and resource capture
+apply. Otherwise the surviving Core destroys its inventory and all owned Units,
+drops Worker cargo and the Champion Beacon at their actual positions, and
+immediately enters the normal respawn flow without awarding loot.
 
 ## Complete event stream
 

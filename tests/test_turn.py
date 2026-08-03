@@ -131,6 +131,9 @@ def test_all_unit_and_core_actions_can_be_queued_or_cleared() -> None:
     turn.core.cancel_move()
     turn.core.pickup_beacon()
     turn.core.drop_beacon()
+    turn.core.self_destruct()
+    assert turn.plan.core_action is not None
+    assert turn.plan.core_action.type == "SELF_DESTRUCT"
     turn.core.wait()
     turn.core.clear_action()
 

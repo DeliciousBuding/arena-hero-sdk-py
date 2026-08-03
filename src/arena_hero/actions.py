@@ -66,7 +66,7 @@ class DropBeaconAction(_StrictModel):
 
 
 class SelfDestructAction(_StrictModel):
-    """Remove a Unit before upkeep without refund or damage."""
+    """Remove a Unit or Core without refund or area damage."""
 
     type: Literal["SELF_DESTRUCT"] = "SELF_DESTRUCT"
 
@@ -125,6 +125,7 @@ CoreAction = Annotated[
     | CancelMoveAction
     | PickupBeaconAction
     | DropBeaconAction
+    | SelfDestructAction
     | HealAction,
     Field(discriminator="type"),
 ]

@@ -19,6 +19,7 @@ from arena_hero import (
     ProtocolError,
     Received,
     ResolutionEvent,
+    SelfDestructAction,
     Tick,
     UnitView,
 )
@@ -302,6 +303,22 @@ def test_plan_encoding_is_stable_compact_and_sorted() -> None:
         b'"00000000-0000-4000-8000-000000000003":{"type":"HARVEST"}}}'
     )
     assert encode_plan(plan) == encoded
+
+
+def test_core_self_destruct_plan_is_strict_and_encodes_without_extra_fields() -> None:
+    plan = CommandPlan(tick=9, core_action=SelfDestructAction())
+
+    assert encode_plan(plan) == (
+        b'{"core_action":{"type":"SELF_DESTRUCT"},"tick":9,"unit_actions":{}}'
+    )
+
+    with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
+        CommandPlan.model_validate(
+            {
+                "tick": 9,
+                "core_action": {"type": "SELF_DESTRUCT", "direction": "UP"},
+            }
+        )
 
 
 def test_parses_acceptance_and_safe_api_errors() -> None:

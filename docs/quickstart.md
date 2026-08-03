@@ -59,6 +59,13 @@ fatal damage cannot be healed. You may queue healing while HP is full or the
 Core is currently empty because same-Tick damage and captured resources resolve
 first.
 
+Queue unconditional Core self-destruction with `turn.core.self_destruct()`.
+It remains valid while the Core is moving and has no resource, Unit, or
+cooldown requirement. Movement and combat resolve first. A lethal enemy attack
+keeps normal destruction credit and resource capture; otherwise the surviving
+Core destroys its inventory and army, drops carried resources and the Beacon,
+and immediately enters the normal respawn flow without awarding loot.
+
 The context manager closes the HTTP and WebSocket connections when the loop
 ends.
 

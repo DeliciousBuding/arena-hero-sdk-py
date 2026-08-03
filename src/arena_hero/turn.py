@@ -289,6 +289,11 @@ class Core:
 
         self._set(DropBeaconAction())
 
+    def self_destruct(self) -> None:
+        """Destroy this Core and its inventory and army after combat."""
+
+        self._set(SelfDestructAction())
+
     def wait(self) -> None:
         """Queue an explicit WAIT."""
 
