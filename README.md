@@ -178,6 +178,16 @@ enemy = turn.visible_enemies[0]
 ranger.shoot(enemy)
 ```
 
+To fire at a cell even when it is currently empty, omit a specific target:
+
+```python
+ranger.shoot_cell((120, 85))
+```
+
+Movement resolves first. The server hits the lowest-HP hostile at that cell,
+breaking ties by UUID, or reports `SHOT_MISSED` if the cell is empty. Use
+`shoot()` when you intentionally want to track one specific object instead.
+
 The server can hit a target 1-3 cells away on the same row, column, or exact
 45-degree diagonal. A relative offset such as `(3, 3)` is in range; `(2, 1)`
 is not. Only obstacles on the intermediate shot cells block fire. Units, Cores,

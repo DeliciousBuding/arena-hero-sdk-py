@@ -46,10 +46,10 @@ class SweepAction(_StrictModel):
 
 
 class ShootAction(_StrictModel):
-    """Shoot an expected target cell with a Ranger in an eight-direction line."""
+    """Shoot a cell, optionally tracking one specific target."""
 
     type: Literal["SHOOT"] = "SHOOT"
-    target_id: UUID
+    target_id: UUID | None = None
     expected_cell: Position
 
 

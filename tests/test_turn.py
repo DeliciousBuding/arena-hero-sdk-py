@@ -11,6 +11,7 @@ from arena_hero import (
     Direction,
     InvalidActionError,
     PlayerState,
+    ShootAction,
     Turn,
     TurnClosedError,
     UnitType,
@@ -121,6 +122,11 @@ def test_all_unit_and_core_actions_can_be_queued_or_cleared() -> None:
     ranger.self_destruct()
     ranger.heal()
     ranger.wait()
+    ranger.shoot_cell((-3, 0))
+    cell_shot = turn.plan.unit_actions[ranger.id]
+    assert isinstance(cell_shot, ShootAction)
+    assert cell_shot.target_id is None
+    assert cell_shot.expected_cell == (-3, 0)
     ranger.shoot(
         UUID("00000000-0000-4000-8000-000000000005"),
         expected_cell=(-2, 0),

@@ -20,6 +20,7 @@ from arena_hero import (
     Received,
     ResolutionEvent,
     SelfDestructAction,
+    ShootAction,
     Tick,
     UnitView,
 )
@@ -258,6 +259,16 @@ def test_upkeep_damage_event_preserves_forward_compatible_values() -> None:
     assert event.values == {"damage": 2, "hp": 0}
     assert event.resource_amount is None
     assert event.healing is None
+
+
+def test_cell_only_shoot_action_omits_target_id() -> None:
+    action = ShootAction(expected_cell=(3, -2))
+
+    assert action.target_id is None
+    assert action.model_dump(mode="json", exclude_none=True) == {
+        "type": "SHOOT",
+        "expected_cell": [3, -2],
+    }
 
 
 @pytest.mark.parametrize(

@@ -179,13 +179,22 @@ class Vanguard(Unit):
 class Ranger(Unit):
     """Control interface for an owned Ranger."""
 
+    def shoot_cell(self, expected_cell: Position) -> None:
+        """Queue a shot at a cell regardless of its current occupants.
+
+        Movement resolves first. The server hits the lowest-HP hostile at that
+        cell, breaking ties by UUID, or reports ``SHOT_MISSED`` if none remains.
+        """
+
+        self._set(ShootAction(expected_cell=expected_cell))
+
     def shoot(
         self,
         target: UUID | str | Unit | Core | UnitView | CoreView,
         *,
         expected_cell: Position | None = None,
     ) -> None:
-        """Queue a shot at a target and its expected cell.
+        """Queue a backward-compatible shot at a specific target and cell.
 
         Passing a visible Unit, Core, or controller derives both required wire
         fields. Passing a UUID or UUID string requires ``expected_cell``.

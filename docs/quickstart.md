@@ -212,6 +212,10 @@ for vanguard in turn.vanguards:
 for ranger in turn.rangers:
     if turn.visible_enemies:
         ranger.shoot(turn.visible_enemies[0])
+    else:
+        # Cell fire needs no visible target; movement resolves before the shot.
+        x, y = ranger.position
+        ranger.shoot_cell((x + 1, y))
 
 if turn.core is not None:
     turn.core.spawn(UnitType.WORKER)
