@@ -122,11 +122,10 @@ Unit: `resource_capacity` is `max(10, state.population * 5)`.
 population falls, Core resources above the new capacity are destroyed
 immediately.
 
-`turn.state.upkeep_next_tick` is charged before movement. If the Core cannot
-pay it all, each unpaid point deals one HP of damage to excess Units instead of
-the Core. The 19 Units nearest the Core are protected; farther Units take the
-damage first. Read `UNIT_DAMAGED` events whose `reason_code` is
-`"UPKEEP_DEFICIT"` to see the affected Unit, damage, and remaining HP.
+Production prices depend on the current living population. Use
+`unit_cost(UnitType.WORKER, turn.state.population)` (or the other Unit type) to
+calculate the exact server price. Units 1-20 use base prices 5/10/12; Units
+21-25 cost 30% more, and the multiplier rises again after every five Units.
 
 `turn.resource_cells` includes visible natural points and Worker cargo piles.
 Pile amounts are not exposed; a partially recovered pile remains in the set.
@@ -150,7 +149,7 @@ worker.wait()
 worker.clear_action()
 ```
 
-If a Worker dies, including through unpaid upkeep or `self_destruct()`, its
+If a Worker dies through combat, Core destruction, or `self_destruct()`, its
 complete cargo amount becomes a recoverable resource pile on its final cell.
 
 ### Vanguard

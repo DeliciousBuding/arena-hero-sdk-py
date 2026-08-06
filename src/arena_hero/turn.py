@@ -122,7 +122,7 @@ class Unit:
         self._set(DropBeaconAction())
 
     def self_destruct(self) -> None:
-        """Remove this Unit before upkeep; Worker cargo drops on its final cell."""
+        """Remove this Unit before movement; Worker cargo drops on its final cell."""
 
         self._set(SelfDestructAction())
 

@@ -10,8 +10,6 @@ def state_payload() -> dict[str, Any]:
         "status": "ACTIVE",
         "resources": 15,
         "population": 3,
-        "population_tier": 0,
-        "upkeep_next_tick": 0,
         "champion_beacon": {"position": [0, 0]},
         "objects": [
             {

@@ -58,7 +58,9 @@ from .models import (
 from .rules import (
     CORE_RESOURCE_CAPACITY_PER_UNIT,
     CORE_RESOURCE_MINIMUM_CAPACITY,
+    UNIT_BASE_COSTS,
     core_resource_capacity,
+    unit_cost,
 )
 from .turn import AsyncTurn, Core, Ranger, Turn, Unit, Vanguard, Worker
 
@@ -67,6 +69,7 @@ __version__ = version("arena-hero")
 __all__ = [
     "CORE_RESOURCE_CAPACITY_PER_UNIT",
     "CORE_RESOURCE_MINIMUM_CAPACITY",
+    "UNIT_BASE_COSTS",
     "APIError",
     "Accepted",
     "ArenaHeroClient",
@@ -124,4 +127,5 @@ __all__ = [
     "Worker",
     "__version__",
     "core_resource_capacity",
+    "unit_cost",
 ]

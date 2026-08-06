@@ -244,23 +244,6 @@ def test_healing_result_helper_validates_cost() -> None:
     assert malformed.healing is None
 
 
-def test_upkeep_damage_event_preserves_forward_compatible_values() -> None:
-    event = ResolutionEvent(
-        event_id=UUID("00000000-0000-4000-8000-000000000033"),
-        tick=9,
-        event_type="UNIT_DAMAGED",
-        reason_code="UPKEEP_DEFICIT",
-        target_id=UUID("00000000-0000-4000-8000-000000000034"),
-        position=(12, -3),
-        values={"damage": 2, "hp": 0},
-    )
-
-    assert event.reason_code == "UPKEEP_DEFICIT"
-    assert event.values == {"damage": 2, "hp": 0}
-    assert event.resource_amount is None
-    assert event.healing is None
-
-
 def test_cell_only_shoot_action_omits_target_id() -> None:
     action = ShootAction(expected_cell=(3, -2))
 

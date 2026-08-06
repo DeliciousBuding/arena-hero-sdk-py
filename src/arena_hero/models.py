@@ -222,8 +222,6 @@ class PlayerState(_StateModel):
     respawn_at_tick: int | None = Field(default=None, ge=1)
     resources: int = Field(ge=0)
     population: int = Field(ge=0)
-    population_tier: int = Field(ge=0)
-    upkeep_next_tick: int = Field(ge=0)
     champion_beacon: ChampionBeacon
     objects: tuple[WorldObject, ...]
     events: tuple[ResolutionEvent, ...]
