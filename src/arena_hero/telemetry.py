@@ -26,10 +26,27 @@ import httpx
 
 TELEMETRY_ENDPOINT_ENV = "ARENA_HERO_TELEMETRY_ENDPOINT"
 TELEMETRY_TENANT_ENV = "ARENA_HERO_TENANT"
+TELEMETRY_MODE_ENV = "ARENA_HERO_MODE"
 SDK_VERSION = "0.2.9-telemetry.1"
+
+PRODUCTION_MODE = "production"
+SIMULATION_MODE = "simulation"
 
 _FLUSH_INTERVAL_SECONDS = 5.0
 _FLUSH_BATCH_SIZE = 20
+
+
+def _read_mode() -> str:
+    """读取 agent 运行模式（production|simulation），缺省 production。
+
+    只认两个合法值；非法/未设置一律回落 production（与 registry 的
+    CHECK(mode IN ...) 对齐，避免脏值进台账）。
+    """
+
+    mode = os.environ.get(TELEMETRY_MODE_ENV, "").strip().lower()
+    if mode not in (PRODUCTION_MODE, SIMULATION_MODE):
+        return PRODUCTION_MODE
+    return mode
 
 
 class TelemetrySink:
@@ -45,10 +62,11 @@ class TelemetrySink:
 class HttpTelemetrySink(TelemetrySink):
     """后台线程批量上报到 ingest 端点。"""
 
-    def __init__(self, endpoint: str, tenant: str, instance_id: str) -> None:
+    def __init__(self, endpoint: str, tenant: str, instance_id: str, mode: str) -> None:
         self._endpoint = endpoint
         self._tenant = tenant
         self._instance_id = instance_id
+        self._mode = mode
         self._queue: queue.Queue[dict[str, Any] | None] = queue.Queue(maxsize=200)
         self._dropped = 0
         self._thread = threading.Thread(
@@ -63,6 +81,7 @@ class HttpTelemetrySink(TelemetrySink):
             "tenant": self._tenant,
             "instance": self._instance_id,
             "ts": time.time(),
+            "mode": self._mode,
             **event,
         }
         try:
@@ -153,13 +172,24 @@ def build_telemetry(
         return TelemetrySink()
     tenant = os.environ.get(TELEMETRY_TENANT_ENV, "unknown").strip() or "unknown"
     instance_id = api_key[-6:] if api_key else "unknown"
-    return HttpTelemetrySink(endpoint, tenant, instance_id)
+    mode = _read_mode()
+    return HttpTelemetrySink(endpoint, tenant, instance_id, mode)
 
 
-def identity_event(*, api_key: str, base_url: str, pid: int) -> dict[str, Any]:
-    """client 创建时的身份注册事件。"""
+def identity_event(
+    *,
+    api_key: str,
+    base_url: str,
+    pid: int,
+    mode: str | None = None,
+) -> dict[str, Any]:
+    """client 创建时的身份注册事件。
 
-    return {
+    ``mode``（production|simulation）可选：传入则随 register 事件上报；
+    缺省省略（HttpTelemetrySink 会按 ``ARENA_HERO_MODE`` 注入同一字段）。
+    """
+
+    event = {
         "event": "register",
         "api_key_tail": api_key[-6:] if api_key else "",
         "base_url": base_url,
@@ -167,3 +197,6 @@ def identity_event(*, api_key: str, base_url: str, pid: int) -> dict[str, Any]:
         "pid": pid,
         "platform": platform.platform(),
     }
+    if mode:
+        event["mode"] = mode
+    return event
