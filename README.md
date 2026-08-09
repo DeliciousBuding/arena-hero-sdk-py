@@ -326,6 +326,51 @@ All SDK exceptions inherit from `ArenaHeroError`.
 Dynamic gameplay failures are not exceptions. They arrive in the next
 `Turn.events` as normal resolution results.
 
+## External config overrides (fork: config-injection)
+
+本地 fork 通道：第三方 agent 不修改决策代码，也能通过**外部配置**注入决策
+参数覆盖（评测变体真实化用）。默认 no-op——未配置时行为与官方 SDK 完全一致。
+
+两种注入方式（环境变量优先于文件）：
+
+```bash
+# 1) 环境变量（键 = 目标字段名，值按 JSON 字面量解析）
+ARENA_CFG_WORKER_TARGET=16 ARENA_CFG_BEACON_POLICY=pursue python agent.py
+
+# 2) 配置文件（工作目录 arena-config.json，或 ARENA_CONFIG_JSON 指向的路径）
+#    {"overrides": {"mode": "control", "target": 40}}
+```
+
+接入（桥接层在"加载 agent 后、决策入口前"调用一次；无配置 = 零操作）：
+
+```python
+from arena_hero import apply_config_overrides, overridden_decide_kwargs
+
+agent = CoreFarmer(worker_target=12)          # 第三方 agent，未改一行代码
+apply_config_overrides(module=agent_module, instance=agent)   # env/文件 → 覆盖
+decide_kwargs = overridden_decide_kwargs({"target": 30, "mode": "harvest"})
+```
+
+覆盖语义：只改写**已存在**的实例属性/模块级常量（函数按调用时 globals 解析，
+运行时 setattr 即生效）；点分键深钻（`ARENA_CFG_STRATEGY_AGGRO` →
+`agent.strategy.aggro`）；字典值深合并；未知键跳过并一次性 stderr 提示；
+解析/应用失败静默回退默认。任何情况下不抛错、不阻断决策循环。
+
+## Telemetry (fork)
+
+默认 no-op：只有设置 `ARENA_HERO_TELEMETRY_ENDPOINT` 后才启用 HTTP 上报
+（后台线程批量、失败静默）。事件：`register` / `connection` / `tick_summary` /
+`disconnected`。`tick_summary` 除资源/人口/核心/测绘字段外，还有 telemetry-v2
+性能字段（向后兼容，旧 ingest 忽略即可）：
+
+| 字段 | 含义 |
+| --- | --- |
+| `state_bytes` | 本 tick 状态消息原始字节数（bytes/tick） |
+| `parse_ms` | 本 tick 状态解析耗时（ms/tick） |
+| `prev_decision_ms` | 上一 tick 决策耗时（Turn 创建 → plan 读取/submit，ms/tick） |
+
+`Turn.decision_ms` 属性可直接读取单 tick 决策耗时（plan 读取前为 None）。
+
 ## Development
 
 This project uses `uv`, a `src/` layout, and a locked development environment.

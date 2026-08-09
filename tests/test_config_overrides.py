@@ -107,7 +107,9 @@ def test_json_list_value(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_dict_deep_merge(monkeypatch: pytest.MonkeyPatch) -> None:
     os_environ_cfg(monkeypatch)
-    monkeypatch.setenv("ARENA_CFG_NESTED", '{"inner": {"depth": 5, "extra": true}}')
+    monkeypatch.setenv(
+        "ARENA_CFG_NESTED", '{"inner": {"depth": 5, "extra": true}}'
+    )
     agent = _DummyAgent()
     apply_config_overrides(instance=agent)
     assert agent.nested == {"inner": {"depth": 5, "extra": True}}
@@ -116,7 +118,10 @@ def test_dict_deep_merge(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_file_overrides(monkeypatch: pytest.MonkeyPatch, tmp_path: pytest.TempPathFactory) -> None:
     os_environ_cfg(monkeypatch)
     config_file = tmp_path / "arena-config.json"
-    config_file.write_text(json.dumps({"overrides": {"mode": "control", "worker_target": 6}}), encoding="utf-8")
+    config_file.write_text(
+        json.dumps({"overrides": {"mode": "control", "worker_target": 6}}),
+        encoding="utf-8",
+    )
     monkeypatch.setenv("ARENA_CONFIG_JSON", str(config_file))
     agent = _DummyAgent()
     apply_config_overrides(instance=agent)

@@ -183,3 +183,19 @@ async def test_async_turn_submits_with_same_control_interface() -> None:
     assert response.accepted is True
     assert submitted[0][0].unit_actions[turn.workers[0].id].type == "HARVEST"
     assert submitted[0][1] == "async-turn-0001"
+
+
+def test_decision_ms_is_none_until_plan_read() -> None:
+    turn = Turn(tick=9, state=make_state(), submitter=lambda _plan, _key: accepted())
+    assert turn.decision_ms is None
+    _ = turn.plan
+    assert turn.decision_ms is not None
+    assert turn.decision_ms >= 0
+
+
+def test_decision_ms_measured_once() -> None:
+    turn = Turn(tick=9, state=make_state(), submitter=lambda _plan, _key: accepted())
+    _ = turn.plan
+    first = turn.decision_ms
+    _ = turn.plan
+    assert turn.decision_ms == first
