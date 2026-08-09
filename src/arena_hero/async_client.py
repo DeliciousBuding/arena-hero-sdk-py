@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from collections.abc import AsyncIterator, Mapping
 from types import MappingProxyType
 
@@ -23,6 +24,7 @@ from .actions import Accepted, CommandPlan
 from .enums import CommandSource
 from .errors import ConfigurationError, ProtocolError, TransportError
 from .models import PlayerState, Received, Tick
+from .telemetry import TelemetrySink, build_telemetry, identity_event
 from .turn import AsyncTurn
 
 AsyncGameEvent = Tick | AsyncTurn | Received
@@ -68,6 +70,11 @@ class AsyncArenaHeroClient:
         self._current_tick: int | None = None
         self._active_turn: AsyncTurn | None = None
         self._latest_receipts: dict[CommandSource, Received] = {}
+        self._telemetry: TelemetrySink = build_telemetry(
+            api_key=api_key,
+            base_url=base_url,
+        )
+        self._telemetry.emit(identity_event(api_key=api_key, base_url=base_url, pid=os.getpid()))
 
     async def __aenter__(self) -> AsyncArenaHeroClient:
         """Enter the asynchronous client context."""
@@ -119,15 +126,37 @@ class AsyncArenaHeroClient:
                     ) as websocket:
                         self._socket = websocket
                         delay = self._config.reconnect_min_delay
+                        self._telemetry.emit({"event": "connection", "status": "up"})
                         async for raw_message in websocket:
                             yield self._materialize(parse_stream_message(raw_message))
                         if websocket.close_code == 1000:
                             return
                 except InvalidStatus as exc:
+                    self._telemetry.emit(
+                        {
+                            "event": "connection",
+                            "status": "error",
+                            "error": f"{type(exc).__name__}: {exc}",
+                        }
+                    )
                     override_delay = check_handshake_exception(exc)
                 except ConnectionClosed as exc:
+                    self._telemetry.emit(
+                        {
+                            "event": "connection",
+                            "status": "error",
+                            "error": f"{type(exc).__name__}: {exc}",
+                        }
+                    )
                     check_close_exception(exc)
-                except (OSError, TimeoutError):
+                except (OSError, TimeoutError) as exc:
+                    self._telemetry.emit(
+                        {
+                            "event": "connection",
+                            "status": "error",
+                            "error": f"{type(exc).__name__}: {exc}",
+                        }
+                    )
                     if self._closed:
                         return
                 finally:
@@ -199,6 +228,8 @@ class AsyncArenaHeroClient:
         if self._socket is not None:
             await self._socket.close()
         await self._http.aclose()
+        self._telemetry.emit({"event": "disconnected"})
+        self._telemetry.close()
 
     def _start_iteration(self) -> None:
         self._ensure_open()
@@ -230,6 +261,54 @@ class AsyncArenaHeroClient:
             raise ProtocolError("state arrived before tick")
         if self._active_turn is not None:
             self._active_turn._seal()
+        controlled_core = next(
+            (o for o in message.objects if o.kind == "CORE" and o.controlled),
+            None,
+        )
+        units = [o for o in message.objects if o.kind == "UNIT"]
+        # 测绘字段（python-mapping-telemetry-v1）：与 turn.py 的解析同源，
+        # 直接从 message.objects 提取坐标，供 command-center ingest 落 survey
+        # 测绘表（resources/obstacles/units_seen/core_hunts）。字段可选。
+        self._telemetry.emit(
+            {
+                "event": "tick_summary",
+                "tick": self._current_tick,
+                "status": message.status.value,
+                "resources": message.resources,
+                "population": message.population,
+                "core": list(controlled_core.position) if controlled_core else None,
+                "units": len(units),
+                "visible_enemies": len([u for u in units if not u.controlled]),
+                "resource_cells": [
+                    list(pos)
+                    for batch in message.objects
+                    if batch.kind == "RESOURCE"
+                    for pos in batch.positions
+                ],
+                "obstacle_cells": [
+                    list(pos)
+                    for batch in message.objects
+                    if batch.kind == "OBSTACLE"
+                    for pos in batch.positions
+                ],
+                "units_seen": [
+                    [
+                        str(u.id),
+                        u.unit_type.value,
+                        int(u.controlled),
+                        u.position[0],
+                        u.position[1],
+                        u.hp,
+                    ]
+                    for u in units
+                ],
+                "enemy_cores": [
+                    [o.position[0], o.position[1], o.owner_username]
+                    for o in message.objects
+                    if o.kind == "CORE" and not o.controlled
+                ],
+            }
+        )
         turn = AsyncTurn(
             tick=self._current_tick,
             state=message,

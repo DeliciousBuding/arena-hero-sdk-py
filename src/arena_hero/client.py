@@ -267,6 +267,10 @@ class ArenaHeroClient:
             None,
         )
         units = [o for o in message.objects if o.kind == "UNIT"]
+        # 测绘字段（python-mapping-telemetry-v1）：与 turn.py 的解析同源，
+        # 直接从 message.objects 提取坐标，供 command-center ingest 落 survey
+        # 测绘表（resources/obstacles/units_seen/core_hunts），t2/t3/t4 与
+        # t1（TS survey:sync）四线测绘对齐。字段可选：旧 ingest 忽略即可。
         self._telemetry.emit(
             {
                 "event": "tick_summary",
@@ -277,6 +281,34 @@ class ArenaHeroClient:
                 "core": list(controlled_core.position) if controlled_core else None,
                 "units": len(units),
                 "visible_enemies": len([u for u in units if not u.controlled]),
+                "resource_cells": [
+                    list(pos)
+                    for batch in message.objects
+                    if batch.kind == "RESOURCE"
+                    for pos in batch.positions
+                ],
+                "obstacle_cells": [
+                    list(pos)
+                    for batch in message.objects
+                    if batch.kind == "OBSTACLE"
+                    for pos in batch.positions
+                ],
+                "units_seen": [
+                    [
+                        str(u.id),
+                        u.unit_type.value,
+                        int(u.controlled),
+                        u.position[0],
+                        u.position[1],
+                        u.hp,
+                    ]
+                    for u in units
+                ],
+                "enemy_cores": [
+                    [o.position[0], o.position[1], o.owner_username]
+                    for o in message.objects
+                    if o.kind == "CORE" and not o.controlled
+                ],
             }
         )
         turn = Turn(
