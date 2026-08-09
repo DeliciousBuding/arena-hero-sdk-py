@@ -22,6 +22,11 @@ from .actions import (
 )
 from .async_client import AsyncArenaHeroClient, AsyncGameEvent
 from .client import ArenaHeroClient, SyncGameEvent
+from .config_overrides import (
+    apply_config_overrides,
+    load_config_overrides,
+    overridden_decide_kwargs,
+)
 from .enums import (
     BeaconStatus,
     CommandSource,
@@ -126,6 +131,9 @@ __all__ = [
     "WaitAction",
     "Worker",
     "__version__",
+    "apply_config_overrides",
     "core_resource_capacity",
+    "load_config_overrides",
+    "overridden_decide_kwargs",
     "unit_cost",
 ]
