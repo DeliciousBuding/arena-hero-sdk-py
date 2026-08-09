@@ -17,6 +17,7 @@ import json
 import os
 import platform
 import queue
+import sys
 import threading
 import time
 from typing import Any
@@ -48,7 +49,7 @@ class HttpTelemetrySink(TelemetrySink):
         self._endpoint = endpoint
         self._tenant = tenant
         self._instance_id = instance_id
-        self._queue: queue.Queue[dict[str, Any] | None] = queue.Queue()
+        self._queue: queue.Queue[dict[str, Any] | None] = queue.Queue(maxsize=200)
         self._dropped = 0
         self._thread = threading.Thread(
             target=self._run,
@@ -68,6 +69,14 @@ class HttpTelemetrySink(TelemetrySink):
             self._queue.put_nowait(payload)
         except queue.Full:
             self._dropped += 1
+        if not self._thread.is_alive():
+            # 自愈：上报线程意外退出时重启（不阻塞主循环）
+            self._thread = threading.Thread(
+                target=self._run,
+                name="arena-hero-telemetry",
+                daemon=True,
+            )
+            self._thread.start()
 
     def close(self) -> None:
         try:
@@ -101,8 +110,19 @@ class HttpTelemetrySink(TelemetrySink):
                         self._flush(client, batch)
                         batch = []
                         last_flush = time.monotonic()
-        except Exception:  # 上报失败静默：遥测绝不能影响游戏
-            pass
+        except Exception as exc:  # 遥测绝不能影响游戏：记录但不抛出
+            print(
+                f"telemetry_sink_thread_exited error={type(exc).__name__}: {exc}",
+                file=sys.stderr,
+                flush=True,
+            )
+        finally:
+            # 退出前把剩余事件清空，避免下次 flush 复用陈旧 batch
+            try:
+                while True:
+                    self._queue.get_nowait()
+            except queue.Empty:
+                pass
 
     def _flush(
         self,
@@ -113,8 +133,12 @@ class HttpTelemetrySink(TelemetrySink):
             return
         try:
             client.post(self._endpoint, json={"events": batch})
-        except httpx.HTTPError:
-            pass
+        except Exception as exc:  # 网络类错误全捕获（HTTPError/Timeout/RuntimeError）
+            print(
+                f"telemetry_flush_failed error={type(exc).__name__}: {exc}",
+                file=sys.stderr,
+                flush=True,
+            )
 
 
 def build_telemetry(
