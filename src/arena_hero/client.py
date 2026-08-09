@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import time
 from collections.abc import Iterator, Mapping
 from types import MappingProxyType
@@ -24,6 +25,7 @@ from .actions import Accepted, CommandPlan
 from .enums import CommandSource
 from .errors import ConfigurationError, ProtocolError, TransportError
 from .models import PlayerState, Received, Tick
+from .telemetry import TelemetrySink, build_telemetry, identity_event
 from .turn import Turn
 
 SyncGameEvent = Tick | Turn | Received
@@ -69,6 +71,11 @@ class ArenaHeroClient:
         self._current_tick: int | None = None
         self._active_turn: Turn | None = None
         self._latest_receipts: dict[CommandSource, Received] = {}
+        self._telemetry: TelemetrySink = build_telemetry(
+            api_key=api_key,
+            base_url=base_url,
+        )
+        self._telemetry.emit(identity_event(api_key=api_key, base_url=base_url, pid=os.getpid()))
 
     def __enter__(self) -> ArenaHeroClient:
         """Enter the client context."""
@@ -120,15 +127,37 @@ class ArenaHeroClient:
                     ) as websocket:
                         self._socket = websocket
                         delay = self._config.reconnect_min_delay
+                        self._telemetry.emit({"event": "connection", "status": "up"})
                         for raw_message in websocket:
                             yield self._materialize(parse_stream_message(raw_message))
                         if websocket.close_code == 1000:
                             return
                 except InvalidStatus as exc:
+                    self._telemetry.emit(
+                        {
+                            "event": "connection",
+                            "status": "error",
+                            "error": f"{type(exc).__name__}: {exc}",
+                        }
+                    )
                     override_delay = check_handshake_exception(exc)
                 except ConnectionClosed as exc:
+                    self._telemetry.emit(
+                        {
+                            "event": "connection",
+                            "status": "error",
+                            "error": f"{type(exc).__name__}: {exc}",
+                        }
+                    )
                     check_close_exception(exc)
-                except (OSError, TimeoutError):
+                except (OSError, TimeoutError) as exc:
+                    self._telemetry.emit(
+                        {
+                            "event": "connection",
+                            "status": "error",
+                            "error": f"{type(exc).__name__}: {exc}",
+                        }
+                    )
                     if self._closed:
                         return
                 finally:
@@ -200,6 +229,8 @@ class ArenaHeroClient:
         if self._socket is not None:
             self._socket.close()
         self._http.close()
+        self._telemetry.emit({"event": "disconnected"})
+        self._telemetry.close()
 
     def _start_iteration(self) -> None:
         self._ensure_open()
@@ -231,6 +262,23 @@ class ArenaHeroClient:
             raise ProtocolError("state arrived before tick")
         if self._active_turn is not None:
             self._active_turn._seal()
+        controlled_core = next(
+            (o for o in message.objects if o.kind == "CORE" and o.controlled),
+            None,
+        )
+        units = [o for o in message.objects if o.kind == "UNIT"]
+        self._telemetry.emit(
+            {
+                "event": "tick_summary",
+                "tick": self._current_tick,
+                "status": message.status.value,
+                "resources": message.resources,
+                "population": message.population,
+                "core": list(controlled_core.position) if controlled_core else None,
+                "units": len(units),
+                "visible_enemies": len([u for u in units if not u.controlled]),
+            }
+        )
         turn = Turn(
             tick=self._current_tick,
             state=message,
