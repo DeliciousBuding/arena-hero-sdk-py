@@ -10,7 +10,9 @@
 - ``tick_summary``   每 tick 玩家状态摘要（资源/人口/核心位置/单位数 + 测绘
                      字段：resource_cells/obstacle_cells/units_seen/enemy_cores，
                      python-mapping-telemetry-v1，2026-08-09；+ telemetry-v2
-                     字段：state_bytes/parse_ms/prev_decision_ms，2026-08-09）
+                     字段：state_bytes/parse_ms/prev_decision_ms，2026-08-09；
+                     + telemetry-v3 字段：controlled_by_type 我方单位构成
+                     {WORKER/VANGUARD/RANGER: n}，2026-08-10）
 - ``disconnected``   client 正常关闭
 
 同步（client.py）与异步（async_client.py）客户端埋点一一对应。
@@ -32,7 +34,7 @@ import httpx
 TELEMETRY_ENDPOINT_ENV = "ARENA_HERO_TELEMETRY_ENDPOINT"
 TELEMETRY_TENANT_ENV = "ARENA_HERO_TENANT"
 TELEMETRY_MODE_ENV = "ARENA_HERO_MODE"
-SDK_VERSION = "0.2.9-telemetry.2"
+SDK_VERSION = "0.2.9-telemetry.3"
 
 PRODUCTION_MODE = "production"
 SIMULATION_MODE = "simulation"
