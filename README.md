@@ -413,6 +413,10 @@ The SDK owns the semantic message contract and both transports from ADR-0004:
 - `record_transcript` / `run_subprocess_transcript` run one canonical
   conformance scenario against the in-memory and subprocess transports; both
   must produce the same transcript and SHA-256 digest.
+- `run_round_in_process` / `run_round_subprocess` run one fixed-contestant
+  round (`hello`/`episode_start`/`decide`/`decision`) and return a
+  fail-closed `RoundResult` classified as `ok`/`timeout`/`crash`/`protocol`/
+  `error` with bounded stderr diagnostics.
 - `ReplayEnvelope` / `transcript_digest` / `replay_transcript` record and
   deterministically replay a full episode round.
 
@@ -421,3 +425,18 @@ Serve the canonical conformance agent over stdin/stdout with:
 ```bash
 python -m arena_hero.agent.io.v1.child
 ```
+
+Run one fixed-contestant smoke round with the entry point runner:
+
+```bash
+# trusted in-process (default)
+python -m arena_hero.agent.io.v1.runner
+# isolated length-framed subprocess
+python -m arena_hero.agent.io.v1.runner --mode subprocess
+```
+
+Library consumers import the runner API from
+`arena_hero.agent.io.v1.runner`: `run_round_in_process(handler)` and
+`run_round_subprocess(command, ...)` share the same deterministic round and
+transcript digest; the runner exits 0 only on a successful round and
+classifies every failure fail-closed on stderr.

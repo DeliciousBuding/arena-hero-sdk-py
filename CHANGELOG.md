@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Add the arena.agent.io.v1 entry point runner (P1-5): one fixed-contestant
+  round (hello/episode_start/decide/decision) over the trusted in-process
+  adapter or the isolated length-framed subprocess transport, with fail-closed
+  outcome classification (ok/timeout/crash/protocol/error) and bounded stderr
+  diagnostics. Wire contract unchanged (v0.3.0a3 compatible).
+
 ## 0.3.0a3 - 2026-08-12
 
 - Add length-framed stdin/stdout subprocess transport for arena.agent.io.v1 (ADR-0004):
