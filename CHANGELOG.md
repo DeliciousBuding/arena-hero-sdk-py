@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0a4 - 2026-08-12
 
 - Add the arena.agent.io.v1 entry point runner (P1-5): one fixed-contestant
   round (hello/episode_start/decide/decision) over the trusted in-process
