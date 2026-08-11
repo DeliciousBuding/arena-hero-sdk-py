@@ -1,6 +1,6 @@
 [project]
 name = "arena-hero"
-version = "0.3.0a1"
+version = "0.3.0a2"
 description = "Arena Hero Python SDK with optional telemetry and config overrides"
 readme = "README.md"
 requires-python = ">=3.11"

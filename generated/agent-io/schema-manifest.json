@@ -1,0 +1,17 @@
+{
+  "contract": "arena.agent.io.v1",
+  "generator": "scripts/generate_agent_io.py",
+  "messageTypes": [
+    "hello",
+    "ready",
+    "episode_start",
+    "decide",
+    "decision",
+    "episode_end",
+    "error"
+  ],
+  "schemaFile": "arena.agent.io.v1.schema.json",
+  "schemaVersion": 1,
+  "sha256": "436e449d6f0790bb78b1501b12be3efb26c4c709c75725fed3bede9098bf5ccc",
+  "typescriptFile": "../typescript/agent-io-v1.ts"
+}

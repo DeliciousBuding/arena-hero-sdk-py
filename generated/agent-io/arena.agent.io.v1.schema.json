@@ -1,0 +1,459 @@
+{
+  "$defs": {
+    "AgentCapabilities": {
+      "additionalProperties": false,
+      "description": "Capabilities negotiated by capability in ``hello``.",
+      "properties": {
+        "cancel": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "title": "AgentCapabilities",
+      "type": "object"
+    },
+    "DecideMessage": {
+      "additionalProperties": false,
+      "description": "Runner request for one decision at a given tenant tick.",
+      "properties": {
+        "deadlineMs": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "messageId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "requestId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": 1,
+          "type": "integer"
+        },
+        "tenantId": {
+          "type": "string"
+        },
+        "tick": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "type": {
+          "const": "decide",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "schemaVersion",
+        "messageId",
+        "requestId",
+        "tenantId",
+        "tick"
+      ],
+      "title": "DecideMessage",
+      "type": "object"
+    },
+    "DecisionMessage": {
+      "additionalProperties": false,
+      "description": "Agent reply to a DecideMessage, echoing its request id.",
+      "properties": {
+        "decisionId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "messageId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "requestId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": 1,
+          "type": "integer"
+        },
+        "tenantId": {
+          "type": "string"
+        },
+        "tick": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "type": {
+          "const": "decision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "schemaVersion",
+        "messageId",
+        "requestId",
+        "decisionId",
+        "tenantId",
+        "tick"
+      ],
+      "title": "DecisionMessage",
+      "type": "object"
+    },
+    "EpisodeEndMessage": {
+      "additionalProperties": false,
+      "description": "Runner notification that a match episode ended.",
+      "properties": {
+        "messageId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "completed",
+            "aborted",
+            "timeout",
+            "invalidated"
+          ],
+          "type": "string"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "schemaVersion": {
+          "const": 1,
+          "type": "integer"
+        },
+        "tenantId": {
+          "type": "string"
+        },
+        "type": {
+          "const": "episode_end",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "schemaVersion",
+        "messageId",
+        "tenantId",
+        "outcome"
+      ],
+      "title": "EpisodeEndMessage",
+      "type": "object"
+    },
+    "EpisodeStartMessage": {
+      "additionalProperties": false,
+      "description": "Runner request that opens a match episode for one tenant.",
+      "properties": {
+        "deadlineMs": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "messageId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rulesVersion": {
+          "type": "string"
+        },
+        "schemaDigests": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "schemaVersion": {
+          "const": 1,
+          "type": "integer"
+        },
+        "seed": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tenantId": {
+          "type": "string"
+        },
+        "type": {
+          "const": "episode_start",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "schemaVersion",
+        "messageId",
+        "tenantId",
+        "rulesVersion"
+      ],
+      "title": "EpisodeStartMessage",
+      "type": "object"
+    },
+    "ErrorMessage": {
+      "additionalProperties": false,
+      "description": "Typed diagnostic envelope; request_id echoes the failed request when known.",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "details": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "message": {
+          "type": "string"
+        },
+        "messageId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "requestId": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "schemaVersion": {
+          "const": 1,
+          "type": "integer"
+        },
+        "type": {
+          "const": "error",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "schemaVersion",
+        "messageId",
+        "code",
+        "message"
+      ],
+      "title": "ErrorMessage",
+      "type": "object"
+    },
+    "HelloMessage": {
+      "additionalProperties": false,
+      "description": "Agent startup handshake announcing contestant identity and capabilities.",
+      "properties": {
+        "capabilities": {
+          "$ref": "#/$defs/AgentCapabilities"
+        },
+        "contestant": {
+          "type": "string"
+        },
+        "messageId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rulesVersions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "schemaVersion": {
+          "const": 1,
+          "type": "integer"
+        },
+        "type": {
+          "const": "hello",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "schemaVersion",
+        "messageId",
+        "contestant",
+        "capabilities"
+      ],
+      "title": "HelloMessage",
+      "type": "object"
+    },
+    "ReadyMessage": {
+      "additionalProperties": false,
+      "description": "Agent acknowledgement after a runner request (for example episode_start).",
+      "properties": {
+        "messageId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "requestId": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": 1,
+          "type": "integer"
+        },
+        "tenantId": {
+          "type": "string"
+        },
+        "type": {
+          "const": "ready",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "schemaVersion",
+        "messageId",
+        "requestId",
+        "tenantId"
+      ],
+      "title": "ReadyMessage",
+      "type": "object"
+    }
+  },
+  "$id": "https://doc.arenahero.io/schema/arena.agent.io.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "discriminator": {
+    "mapping": {
+      "decide": "#/$defs/DecideMessage",
+      "decision": "#/$defs/DecisionMessage",
+      "episode_end": "#/$defs/EpisodeEndMessage",
+      "episode_start": "#/$defs/EpisodeStartMessage",
+      "error": "#/$defs/ErrorMessage",
+      "hello": "#/$defs/HelloMessage",
+      "ready": "#/$defs/ReadyMessage"
+    },
+    "propertyName": "type"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/HelloMessage"
+    },
+    {
+      "$ref": "#/$defs/ReadyMessage"
+    },
+    {
+      "$ref": "#/$defs/EpisodeStartMessage"
+    },
+    {
+      "$ref": "#/$defs/DecideMessage"
+    },
+    {
+      "$ref": "#/$defs/DecisionMessage"
+    },
+    {
+      "$ref": "#/$defs/EpisodeEndMessage"
+    },
+    {
+      "$ref": "#/$defs/ErrorMessage"
+    }
+  ],
+  "title": "arena.agent.io.v1"
+}

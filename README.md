@@ -30,7 +30,7 @@ pip install arena-hero
 Install this fork baseline from its immutable tag:
 
 ```bash
-pip install "arena-hero @ git+https://github.com/DeliciousBuding/arena-hero-sdk-py.git@v0.3.0a1"
+pip install "arena-hero @ git+https://github.com/DeliciousBuding/arena-hero-sdk-py.git@v0.3.0a2"
 ```
 
 ## Synchronous game loop
