@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0a3 - 2026-08-12
 
 - Add length-framed stdin/stdout subprocess transport for arena.agent.io.v1 (ADR-0004):
   hello version negotiation, bounded recv deadlines, per-frame payload limits, bounded
