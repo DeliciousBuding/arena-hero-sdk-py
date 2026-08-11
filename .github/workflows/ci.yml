@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, telemetry-sink]
   pull_request:
-    branches: [main]
+    branches: [main, telemetry-sink]
 
 permissions:
   contents: read

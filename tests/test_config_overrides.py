@@ -1,13 +1,14 @@
-"""config_overrides 模块测试（SDK fork 配置注入通道，2026-08-09）。
+"""config_overrides 模块测试(SDK fork 配置注入通道,2026-08-09)。
 
-核心保证（验收 #1）：
-- 无 ARENA_CFG_* / 配置文件 → 零操作（no-op，与官方 SDK 逐字节一致）
-- 环境变量 + 配置文件注入；env 优先；类型按既有值强转
-- 点分键沿属性链深钻；未知键静默跳过不抛错
-- 损坏配置静默降级（记 stderr、回退默认）
+核心保证(验收 #1):
+- 无 ARENA_CFG_* / 配置文件 → 零操作(no-op,与官方 SDK 逐字节一致)
+- 环境变量 + 配置文件注入;env 优先;类型按既有值强转
+- 点分键沿属性链深钻;未知键静默跳过不抛错
+- 损坏配置静默降级(记 stderr、回退默认)
 """
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -25,13 +26,14 @@ class _DummyStrategy:
 
 
 class _DummyAgent:
-    """模拟第三方 agent 实例（默认值 + 嵌套 strategy）。"""
+    """模拟第三方 agent 实例(默认值 + 嵌套 strategy)。"""
 
     def __init__(self) -> None:
         self.worker_target = 12
         self.beacon_policy = "retreat"
         self.mode = "harvest"
         self.nested = {"inner": {"depth": 1}}
+        self.waypoints: list[int] = [0, 0]
         self.strategy = _DummyStrategy()
 
 
@@ -88,6 +90,7 @@ def test_env_bool_and_float(monkeypatch: pytest.MonkeyPatch) -> None:
     assert agent.strategy.aggro == 0.75
     assert isinstance(agent.strategy.aggro, float)
 
+
 def test_dotted_key_walks_attrs(monkeypatch: pytest.MonkeyPatch) -> None:
     os_environ_cfg(monkeypatch)
     monkeypatch.setenv("ARENA_CFG_STRATEGY_LIMIT", "3")
@@ -107,15 +110,13 @@ def test_json_list_value(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_dict_deep_merge(monkeypatch: pytest.MonkeyPatch) -> None:
     os_environ_cfg(monkeypatch)
-    monkeypatch.setenv(
-        "ARENA_CFG_NESTED", '{"inner": {"depth": 5, "extra": true}}'
-    )
+    monkeypatch.setenv("ARENA_CFG_NESTED", '{"inner": {"depth": 5, "extra": true}}')
     agent = _DummyAgent()
     apply_config_overrides(instance=agent)
     assert agent.nested == {"inner": {"depth": 5, "extra": True}}
 
 
-def test_file_overrides(monkeypatch: pytest.MonkeyPatch, tmp_path: pytest.TempPathFactory) -> None:
+def test_file_overrides(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     os_environ_cfg(monkeypatch)
     config_file = tmp_path / "arena-config.json"
     config_file.write_text(
@@ -130,7 +131,7 @@ def test_file_overrides(monkeypatch: pytest.MonkeyPatch, tmp_path: pytest.TempPa
     assert agent.beacon_policy == "retreat"  # 未覆盖键保持默认
 
 
-def test_env_wins_over_file(monkeypatch: pytest.MonkeyPatch, tmp_path: pytest.TempPathFactory) -> None:
+def test_env_wins_over_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     os_environ_cfg(monkeypatch)
     config_file = tmp_path / "arena-config.json"
     config_file.write_text(json.dumps({"worker_target": 6}), encoding="utf-8")
@@ -143,7 +144,7 @@ def test_env_wins_over_file(monkeypatch: pytest.MonkeyPatch, tmp_path: pytest.Te
 
 def test_corrupt_file_silently_degrades(
     monkeypatch: pytest.MonkeyPatch,
-    tmp_path: pytest.TempPathFactory,
+    tmp_path: Path,
 ) -> None:
     os_environ_cfg(monkeypatch)
     config_file = tmp_path / "arena-config.json"

@@ -325,7 +325,7 @@ class _TurnBase:
         self.tick = tick
         self.state = state
         self._builder = _PlanBuilder(tick)
-        # 决策计时（telemetry-v2）：Turn 创建 → 首次读取 plan/submit 的耗时。
+        # 决策计时(telemetry-v2):Turn 创建 → 首次读取 plan/submit 的耗时。
         self._created_at = time.monotonic()
         self._decision_ms: float | None = None
         units: list[Unit] = []
@@ -418,8 +418,8 @@ class _TurnBase:
     def plan(self) -> CommandPlan:
         """Return the complete plan currently queued for submission.
 
-        首次读取时记录决策耗时（telemetry-v2：Turn 创建 → plan 成形，
-        ms，见 ``decision_ms``）。
+        首次读取时记录决策耗时(telemetry-v2:Turn 创建 → plan 成形,
+        ms,见 ``decision_ms``)。
         """
 
         if self._decision_ms is None:
@@ -428,9 +428,9 @@ class _TurnBase:
 
     @property
     def decision_ms(self) -> float | None:
-        """本次决策耗时（ms）：Turn 创建 → 首次读取 ``plan``/``submit``。
+        """本次决策耗时(ms):Turn 创建 → 首次读取 ``plan``/``submit``。
 
-        plan 尚未读取时返回 None。只读、无副作用——遥测字段，不参与决策。
+        plan 尚未读取时返回 None。只读、无副作用——遥测字段,不参与决策。
         """
 
         return self._decision_ms

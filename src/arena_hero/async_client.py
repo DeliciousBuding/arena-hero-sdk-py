@@ -17,7 +17,9 @@ from ._client_common import (
     build_config,
     check_close_exception,
     check_handshake_exception,
+    core_views,
     jitter,
+    unit_views,
     validate_idempotency_key,
 )
 from ._protocol import api_error, encode_plan, parse_accepted, parse_stream_message
@@ -75,7 +77,9 @@ class AsyncArenaHeroClient:
             api_key=api_key,
             base_url=base_url,
         )
-        self._telemetry.emit(identity_event(api_key=api_key, base_url=base_url, pid=os.getpid()))
+        self._telemetry.emit(
+            identity_event(api_key=api_key, base_url=base_url, pid=os.getpid())
+        )
 
     async def __aenter__(self) -> AsyncArenaHeroClient:
         """Enter the asynchronous client context."""
@@ -129,8 +133,8 @@ class AsyncArenaHeroClient:
                         delay = self._config.reconnect_min_delay
                         self._telemetry.emit({"event": "connection", "status": "up"})
                         async for raw_message in websocket:
-                            # 遥测旁路（telemetry-v2）：状态消息体积 + 解析耗时
-                            # 随 tick_summary 上报；不参与决策语义，纯计时零侵入。
+                            # 遥测旁路(telemetry-v2):状态消息体积 + 解析耗时
+                            # 随 tick_summary 上报;不参与决策语义,纯计时零侵入。
                             parse_started = time.monotonic()
                             message = parse_stream_message(raw_message)
                             parse_ms = (time.monotonic() - parse_started) * 1000.0
@@ -280,26 +284,26 @@ class AsyncArenaHeroClient:
         if self._active_turn is not None:
             self._active_turn._seal()
         controlled_core = next(
-            (o for o in message.objects if o.kind == "CORE" and o.controlled),
+            (o for o in core_views(message.objects) if o.controlled),
             None,
         )
-        units = [o for o in message.objects if o.kind == "UNIT"]
-        # 决策耗时（telemetry-v2）：上一 tick 的 Turn 创建 → plan 读取/submit。
+        units = list(unit_views(message.objects))
+        # 决策耗时(telemetry-v2):上一 tick 的 Turn 创建 → plan 读取/submit。
         prev_decision_ms: float | None = None
         if self._active_turn is not None and self._active_turn.decision_ms is not None:
             prev_decision_ms = round(self._active_turn.decision_ms, 3)
-        # 我方单位构成（telemetry-v3，2026-08-10）：controlled UNIT 按类型
-        # 计数（WORKER/VANGUARD/RANGER），command-center 台账落 vanguards/
-        # rangers 列——overview/侧栏直接显示构成，不再依赖 calibration 反推。
+        # 我方单位构成(telemetry-v3,2026-08-10):controlled UNIT 按类型
+        # 计数(WORKER/VANGUARD/RANGER),command-center 台账落 vanguards/
+        # rangers 列——overview/侧栏直接显示构成,不再依赖 calibration 反推。
         controlled_by_type: dict[str, int] = {}
         for u in units:
             if not u.controlled:
                 continue
-            t = u.unit_type.value if hasattr(u.unit_type, "value") else str(u.unit_type)
+            t = u.unit_type.value
             controlled_by_type[t] = controlled_by_type.get(t, 0) + 1
-        # 测绘字段（python-mapping-telemetry-v1）：与 turn.py 的解析同源，
-        # 直接从 message.objects 提取坐标，供 command-center ingest 落 survey
-        # 测绘表（resources/obstacles/units_seen/core_hunts）。字段可选。
+        # 测绘字段(python-mapping-telemetry-v1):与 turn.py 的解析同源,
+        # 直接从 message.objects 提取坐标,供 command-center ingest 落 survey
+        # 测绘表(resources/obstacles/units_seen/core_hunts)。字段可选。
         self._telemetry.emit(
             {
                 "event": "tick_summary",
@@ -311,8 +315,8 @@ class AsyncArenaHeroClient:
                 "units": len(units),
                 "controlled_by_type": controlled_by_type,
                 "visible_enemies": len([u for u in units if not u.controlled]),
-                # telemetry-v2（2026-08-09）：状态消息体积/解析耗时/上 tick
-                # 决策耗时。向后兼容：旧 ingest 忽略新字段即可。
+                # telemetry-v2(2026-08-09):状态消息体积/解析耗时/上 tick
+                # 决策耗时。向后兼容:旧 ingest 忽略新字段即可。
                 "state_bytes": raw_bytes,
                 "parse_ms": round(parse_ms, 3) if parse_ms is not None else None,
                 "prev_decision_ms": prev_decision_ms,
@@ -341,8 +345,8 @@ class AsyncArenaHeroClient:
                 ],
                 "enemy_cores": [
                     [o.position[0], o.position[1], o.owner_username]
-                    for o in message.objects
-                    if o.kind == "CORE" and not o.controlled
+                    for o in core_views(message.objects)
+                    if not o.controlled
                 ],
             }
         )

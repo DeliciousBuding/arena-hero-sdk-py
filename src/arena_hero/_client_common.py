@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
 from random import SystemRandom
 from urllib.parse import urlsplit, urlunsplit
@@ -10,17 +10,35 @@ from uuid import uuid4
 
 from websockets.exceptions import ConnectionClosed, InvalidStatus
 
+from ._version import __version__
 from .errors import (
     AuthenticationError,
     ConfigurationError,
     PolicyViolationError,
     TransportError,
 )
+from .models import CoreView, UnitView, WorldObject
 
 DEFAULT_BASE_URL = "https://api.arenahero.io"
+
+
+def core_views(objects: Iterable[WorldObject]) -> Iterator[CoreView]:
+    """Yield only ``kind == "CORE"`` objects from a WorldObject batch."""
+    for obj in objects:
+        if isinstance(obj, CoreView):
+            yield obj
+
+
+def unit_views(objects: Iterable[WorldObject]) -> Iterator[UnitView]:
+    """Yield only ``kind == "UNIT"`` objects from a WorldObject batch."""
+    for obj in objects:
+        if isinstance(obj, UnitView):
+            yield obj
+
+
 COMMAND_PATH = "/api/v1/game/commands"
 WEBSOCKET_PATH = "/api/v1/game/ws"
-USER_AGENT = "arena-hero-python/0.1.0"
+USER_AGENT = f"arena-hero-python/{__version__}"
 _SYSTEM_RANDOM = SystemRandom()
 
 

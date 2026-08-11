@@ -21,10 +21,16 @@ submits one complete plan when you call `submit()`.
 
 Python 3.11 or newer is required.
 
-Install the published release:
+Install the upstream release from PyPI:
 
 ```bash
 pip install arena-hero
+```
+
+Install this fork baseline from its immutable tag:
+
+```bash
+pip install "arena-hero @ git+https://github.com/DeliciousBuding/arena-hero-sdk-py.git@v0.3.0a1"
 ```
 
 ## Synchronous game loop
@@ -287,7 +293,7 @@ For asynchronous code, use `await game.submit(plan)`.
 The SDK:
 
 - sends the API key only in the `Authorization` header;
-- never reads credentials or endpoints from environment variables;
+- reads game credentials and game API endpoints only from explicit client arguments;
 - disables WebSocket message compression to match the server contract;
 - uses protocol Ping/Pong automatically;
 - reconnects with jittered exponential backoff from 250 ms to 5 seconds;
@@ -346,8 +352,8 @@ ARENA_CFG_WORKER_TARGET=16 ARENA_CFG_BEACON_POLICY=pursue python agent.py
 ```python
 from arena_hero import apply_config_overrides, overridden_decide_kwargs
 
-agent = CoreFarmer(worker_target=12)          # 第三方 agent，未改一行代码
-apply_config_overrides(module=agent_module, instance=agent)   # env/文件 → 覆盖
+agent = CoreFarmer(worker_target=12)  # 第三方 agent，未改一行代码
+apply_config_overrides(module=agent_module, instance=agent)  # env/文件 → 覆盖
 decide_kwargs = overridden_decide_kwargs({"target": 30, "mode": "harvest"})
 ```
 

@@ -1,7 +1,6 @@
 """Official Python SDK for Arena Hero."""
 
-from importlib.metadata import version
-
+from ._version import __version__
 from .actions import (
     Accepted,
     CancelMoveAction,
@@ -68,8 +67,6 @@ from .rules import (
     unit_cost,
 )
 from .turn import AsyncTurn, Core, Ranger, Turn, Unit, Vanguard, Worker
-
-__version__ = version("arena-hero")
 
 __all__ = [
     "CORE_RESOURCE_CAPACITY_PER_UNIT",
