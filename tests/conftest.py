@@ -1,6 +1,37 @@
 """Reusable authoritative payloads for SDK tests."""
 
+from __future__ import annotations
+
+import sys
+from pathlib import Path
 from typing import Any
+
+SRC_DIR = str(Path(__file__).resolve().parents[1] / "src")
+"""Source tree injected into child processes so they import the working copy."""
+
+CHILD_MODULE = "arena_hero.agent.io.v1.child"
+"""Module serving the canonical conformance agent over stdin/stdout."""
+
+
+def child_command(*args: str) -> list[str]:
+    """Command running the conformance child module."""
+
+    return [sys.executable, "-m", CHILD_MODULE, *args]
+
+
+def python_command(script: str) -> list[str]:
+    """Command running an inline Python script in a child process."""
+
+    return [sys.executable, "-c", script]
+
+
+def child_env(extra: dict[str, str] | None = None) -> dict[str, str]:
+    """Environment passed to child processes; PYTHONPATH always points at src."""
+
+    env = {"PYTHONPATH": SRC_DIR}
+    if extra:
+        env.update(extra)
+    return env
 
 
 def state_payload() -> dict[str, Any]:

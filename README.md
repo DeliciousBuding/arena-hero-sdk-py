@@ -397,3 +397,27 @@ The public game protocol is documented at
 ## License
 
 [Apache License 2.0](LICENSE)
+
+## Agent I/O transport (arena.agent.io.v1)
+
+The SDK owns the semantic message contract and both transports from ADR-0004:
+
+- `arena_hero.agent.io.v1` provides the typed messages
+  (`hello`/`ready`/`episode_start`/`decide`/`decision`/`episode_end`/`error`),
+  deterministic encoding, and fail-closed parsing.
+- `SubprocessAgentTransport` runs an agent as an isolated child process with
+  length-framed JSON over stdin/stdout. It enforces hello version negotiation,
+  bounded deadlines, payload limits, allowlisted environment, a private
+  temporary directory, bounded stderr diagnostics, crash isolation, and
+  process-tree termination on close.
+- `record_transcript` / `run_subprocess_transcript` run one canonical
+  conformance scenario against the in-memory and subprocess transports; both
+  must produce the same transcript and SHA-256 digest.
+- `ReplayEnvelope` / `transcript_digest` / `replay_transcript` record and
+  deterministically replay a full episode round.
+
+Serve the canonical conformance agent over stdin/stdout with:
+
+```bash
+python -m arena_hero.agent.io.v1.child
+```

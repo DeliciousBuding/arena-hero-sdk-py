@@ -1,5 +1,21 @@
-"""arena.agent.io.v1: semantic messages between Arena runners and agents."""
+"""arena.agent.io.v1: semantic messages and transports for Arena agents."""
 
+from .child import serve_stdio
+from .conformance import (
+    ConformanceAgent,
+    canonical_scenario,
+    record_transcript,
+    run_subprocess_transcript,
+)
+from .framing import (
+    DEFAULT_MAX_FRAME_SIZE,
+    FRAME_HEADER_SIZE,
+    FrameDecoder,
+    FrameTooLargeError,
+    encode_frame,
+    frame_length,
+)
+from .handler import AgentHandler
 from .messages import (
     AGENT_IO_SCHEMA_VERSION,
     MESSAGE_TYPES,
@@ -17,22 +33,74 @@ from .messages import (
     SchemaVersion,
 )
 from .protocol import encode_agent_message, parse_agent_message
+from .replay import (
+    REPLAY_FORMAT_VERSION,
+    Direction,
+    ReplayEnvelope,
+    ReplayMismatchError,
+    TranscriptRecord,
+    encode_replay,
+    parse_replay,
+    replay_transcript,
+    transcript_digest,
+)
+from .transport import (
+    DEFAULT_ENV_ALLOWLIST,
+    DEFAULT_IO_TIMEOUT_MS,
+    DEFAULT_STDERR_LIMIT,
+    AgentDeadlineError,
+    AgentProcessCrashedError,
+    AgentProtocolViolationError,
+    SubprocessAgentTransport,
+    SubprocessTransportError,
+    build_child_env,
+)
 
 __all__ = [
     "AGENT_IO_SCHEMA_VERSION",
+    "DEFAULT_ENV_ALLOWLIST",
+    "DEFAULT_IO_TIMEOUT_MS",
+    "DEFAULT_MAX_FRAME_SIZE",
+    "DEFAULT_STDERR_LIMIT",
+    "FRAME_HEADER_SIZE",
     "MESSAGE_TYPES",
+    "REPLAY_FORMAT_VERSION",
     "AgentCapabilities",
+    "AgentDeadlineError",
+    "AgentHandler",
     "AgentMessage",
     "AgentMessageBase",
+    "AgentProcessCrashedError",
+    "AgentProtocolViolationError",
+    "ConformanceAgent",
     "DecideMessage",
     "DecisionMessage",
+    "Direction",
     "EpisodeEndMessage",
     "EpisodeOutcome",
     "EpisodeStartMessage",
     "ErrorMessage",
+    "FrameDecoder",
+    "FrameTooLargeError",
     "HelloMessage",
     "ReadyMessage",
+    "ReplayEnvelope",
+    "ReplayMismatchError",
     "SchemaVersion",
+    "SubprocessAgentTransport",
+    "SubprocessTransportError",
+    "TranscriptRecord",
+    "build_child_env",
+    "canonical_scenario",
     "encode_agent_message",
+    "encode_frame",
+    "encode_replay",
+    "frame_length",
     "parse_agent_message",
+    "parse_replay",
+    "record_transcript",
+    "replay_transcript",
+    "run_subprocess_transcript",
+    "serve_stdio",
+    "transcript_digest",
 ]
