@@ -1,0 +1,2 @@
+# Force LF checkouts for generated artifacts so byte-identical regeneration checks pass on Windows (core.autocrlf=true) and match committed LF blobs.
+generated/** text eol=lf
